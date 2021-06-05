@@ -237,8 +237,6 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 			<ul class='switcher nav-list-h m-phone'>
 				
-					<li><a class="s-search fas fa-search fa-fw" target="_self" href='javascript:void(0)'></a></li>
-				
 				<li>
           <a class="s-menu fas fa-bars fa-fw" target="_self" href='javascript:void(0)'></a>
           <ul class="menu-phone list-v navigation white-box">
@@ -928,30 +926,6 @@ var loadCSS = function( href, before, media, attributes ){
 
 
 <!-- optional -->
-
-  <script>
-const SearchServiceimagePath="https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@master/img/";
-const ROOT =  ("/" || "/").endsWith('/') ? ("/" || "/") : ("//" || "/" );
-
-$('.input.u-search-input').one('focus',function(){
-	
-		loadScript('/js/search/hexo.js',setSearchService);
-	
-})
-
-function listenSearch(){
-  
-    customSearch = new HexoSearch({
-      imagePath: SearchServiceimagePath
-    });
-  
-}
-function setSearchService() {
-	listenSearch();
-	
-}
-</script>
-
 
 
 
