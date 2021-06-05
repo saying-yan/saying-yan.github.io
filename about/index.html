@@ -351,7 +351,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper docs search' style="display: none;">
+        <div id="full" class='cover-wrapper docs featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -362,16 +362,10 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <p class="title">Sayingの魔法书</p>
     
     
+      <p class="subtitle">纸の上の魔法使い</p>
+    
   </div>
   <div class='bottom'>
-    
-      <div class="m_search">
-        <form name="searchform" class="form u-search-form">
-          <input type="text" class="input u-search-input" placeholder="A Wonderful Theme for Hexo" />
-          <i class="icon fas fa-search fa-fw"></i>
-        </form>
-      </div>
-    
     <div class='menu navigation'>
       <div class='list-h'>
         
@@ -380,35 +374,35 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
               
               
               id="v4getting-started">
-              <p>文档</p>
+              <img src='https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f5c3.svg'><p>文档</p>
             </a>
           
             <a href="/faqs/"
               
               
               id="faqs">
-              <p>帮助</p>
+              <img src='https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f516.svg'><p>帮助</p>
             </a>
           
             <a href="/examples/"
               
               
               id="examples">
-              <p>示例</p>
+              <img src='https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f396.svg'><p>示例</p>
             </a>
           
             <a href="/artitalk/"
               
               
               id="artitalk">
-              <p>说说</p>
+              <img src='https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f389.svg'><p>说说</p>
             </a>
           
             <a href="/archives/"
               
               
               id="archives">
-              <p>博客</p>
+              <img src='https://cdn.jsdelivr.net/gh/twitter/twemoji@13.0/assets/svg/1f4f0.svg'><p>博客</p>
             </a>
           
         
@@ -774,7 +768,7 @@ var loadCSS = function( href, before, media, attributes ){
 <script src="https://cdn.jsdelivr.net/npm/jquery-backstretch@2.1.18/jquery.backstretch.min.js"></script>
 
     <script type="text/javascript">
-        var imgs=["https://gitee.com/saying_yy/blog-image/raw/master/img/-4e87aecfcae36e38.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/-bc2bc122c1ab053.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/86A407C87B6DE8CE102857C78A717857.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/20210603205957.png"];
+        var imgs=["https://gitee.com/saying_yy/blog-image/raw/master/img/-4e87aecfcae36e38.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/-bc2bc122c1ab053.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/86A407C87B6DE8CE102857C78A717857.jpg", "https://gitee.com/saying_yy/blog-image/raw/master/img/93480bfa2d61c4aa0493d4af63722a634ca381d7_raw.jpg"];
         if ('true' == 'true') {
           function shuffle(arr){
             /*From countercurrent-time*/
@@ -941,7 +935,7 @@ const ROOT =  ("/" || "/").endsWith('/') ? ("/" || "/") : ("//" || "/" );
 
 $('.input.u-search-input').one('focus',function(){
 	
-		loadScript('https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@2.6.4/js/search.js',setSearchService);
+		loadScript('/js/search/hexo.js',setSearchService);
 	
 })
 
@@ -954,8 +948,6 @@ function listenSearch(){
 }
 function setSearchService() {
 	listenSearch();
-	
-		document.addEventListener("pjax:success", listenSearch);
 	
 }
 </script>
