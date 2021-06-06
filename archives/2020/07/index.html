@@ -5,6 +5,8 @@
   <!-- SEO相关 -->
   
     
+      <meta name="robots" content="noindex,follow">
+    
   
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
@@ -22,7 +24,7 @@
 
   <!-- 页面元数据 -->
   
-  <title>Sayingの魔法书</title>
+  <title>Archive: 2020/7 - Sayingの魔法书</title>
   
 
   
@@ -102,7 +104,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   <body>
     
 
-<header id="l_header" class="l_header auto shadow blur show" style='opacity: 0' >
+<header id="l_header" class="l_header auto shadow blur " style='opacity: 0' >
   <div class='container'>
   <div id='wrapper'>
     <div class='nav-sub'>
@@ -351,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper list featured' style="display: none;">
+        <div id="half" class='cover-wrapper  featured' style="display: ;">
           
             <div id='cover-backstretch'></div>
           
@@ -414,42 +416,86 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+	
+		
+  <section class="post-list">
+    
+      
+        
+          
+        
+      
+    
+    
+      
+        
+          <div class='post-wrapper'>
+            <div class="post post-v3 white-box reveal shadow">
   
-    <section class="post-list">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </section>
   
+  
+    <div class='headimg-div'>
+      <a class='headimg-a' href="/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/">
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143141.png'/>
+      </a>
+    </div>
+  
+  
+    
+    <h2 class="article-title" >
+      <a href="/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/">
+        报错注入
+      </a>
+    </h2>
+  
+  <div class='md'>
+    
+      
+        报错注入之前都是做题中积累经验，感觉自己的基础薄弱。大部分时候都是看别人的WP才能做题。最近在看一本《CTF训练营》，补一补基础，做笔记。
+报错注入的条件
+可回显
+回显有报错信息
+过滤不严格（希望WAF不行）
+
+绕过是个麻烦事儿，这里暂且假设没有任何过滤。
+报错注入使用的函数updatexml()1234UPDATEXML (XML_document, XPath_string, new_v...
+      
+    
+  </div>
+  
+    <div class='meta-v3' line_style='solid'>
+      <div>
+        
+        <time>2020-07-10</time>
+        
+          <span class="dot"></span>
+          <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
+        
+      </div>
+      
+        <div>
+          <a class='readmore' href='/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/'>
+            Read More
+          </a>
+        </div>
+      
+    </div>
+  
+
+</div>
+
+          </div>
+        
+      
+    
+  </section>
+  
+    
+  
+
+
+	
 </div>
 <aside class='l_side'>
   
@@ -607,14 +653,14 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   // header 这里无论是否开启pjax都需要
   var l_header=document.getElementById("l_header");
   
-  l_header.classList.add("show");
+  l_header.classList.remove("show");
   
   
     // cover
     var cover_wrapper=document.querySelector('.cover-wrapper');
     
-    cover_wrapper.id="none";
-    cover_wrapper.style.display="none";
+    cover_wrapper.id="half";
+    cover_wrapper.style.display="";
     
   
 </script>

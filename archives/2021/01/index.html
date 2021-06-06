@@ -5,6 +5,8 @@
   <!-- SEO相关 -->
   
     
+      <meta name="robots" content="noindex,follow">
+    
   
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
@@ -22,7 +24,7 @@
 
   <!-- 页面元数据 -->
   
-  <title>Sayingの魔法书</title>
+  <title>Archive: 2021/1 - Sayingの魔法书</title>
   
 
   
@@ -102,7 +104,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   <body>
     
 
-<header id="l_header" class="l_header auto shadow blur show" style='opacity: 0' >
+<header id="l_header" class="l_header auto shadow blur " style='opacity: 0' >
   <div class='container'>
   <div id='wrapper'>
     <div class='nav-sub'>
@@ -351,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper list featured' style="display: none;">
+        <div id="half" class='cover-wrapper  featured' style="display: ;">
           
             <div id='cover-backstretch'></div>
           
@@ -414,42 +416,77 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+	
+		
+  <section class="post-list">
+    
+      
+        
+          
+        
+      
+    
+    
+      
+        
+          <div class='post-wrapper'>
+            <div class="post post-v3 white-box reveal shadow">
   
-    <section class="post-list">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </section>
   
+  
+    <div class='headimg-div'>
+      <a class='headimg-a' href="/2021/01/26/PHP_stream_wrapper/">
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143357.png'/>
+      </a>
+    </div>
+  
+  
+    
+    <h2 class="article-title" >
+      <a href="/2021/01/26/PHP_stream_wrapper/">
+        PHP stream wrapper
+      </a>
+    </h2>
+  
+  <div class='md'>
+    
+      
+        PHP stream wrapper机制相关题目的分析整理一、流和包装器简介**流(stream)**是在PHP 4.3.0中引入的，作为一种通用文件、网络、数据压缩和其他操作的方式，这些操作共享一组共同的函数和用途。在其最简单的定义中，流是一种表现出流行为的资源对象。
+每一种流都实现了一个**包装器(wrapper)**，包装器包含一些额外的代码用来处理特殊的协议和编码。PHP提供了一些内...
+      
+    
+  </div>
+  
+    <div class='meta-v3' line_style='solid'>
+      <div>
+        
+        <time>2021-01-26</time>
+        
+      </div>
+      
+        <div>
+          <a class='readmore' href='/2021/01/26/PHP_stream_wrapper/'>
+            Read More
+          </a>
+        </div>
+      
+    </div>
+  
+
+</div>
+
+          </div>
+        
+      
+    
+  </section>
+  
+    
+  
+
+
+	
 </div>
 <aside class='l_side'>
   
@@ -607,14 +644,14 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   // header 这里无论是否开启pjax都需要
   var l_header=document.getElementById("l_header");
   
-  l_header.classList.add("show");
+  l_header.classList.remove("show");
   
   
     // cover
     var cover_wrapper=document.querySelector('.cover-wrapper');
     
-    cover_wrapper.id="none";
-    cover_wrapper.style.display="none";
+    cover_wrapper.id="half";
+    cover_wrapper.style.display="";
     
   
 </script>

