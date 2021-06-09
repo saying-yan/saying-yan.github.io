@@ -647,7 +647,10 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       
         Use
         <a href="https://github.com/volantis-x/hexo-theme-volantis/tree/4.3.1" target="_blank" class="codename">Volantis</a>
-        as theme
+        as theme, total visits
+          <span id="busuanzi_value_site_pv"><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+          times
+        
       
     
       
@@ -993,7 +996,7 @@ var loadCSS = function( href, before, media, attributes ){
       path = defaultPath || decodeURI(window.location.pathname);
     }
     var valine = new Valine();
-    valine.init(Object.assign({"path":null,"placeholder":"快来评论吧~","appId":"Ufjxyhl1UdwhJx0RYQSk5vlT-MdYXbMMI","appKey":"buKTrgdG6xJPU7vMs4raKGNq","meta":["nick","mail","link"],"requiredFields":["nick","mail"],"enableQQ":true,"recordIP":false,"avatar":"robohash","pageSize":10,"lang":"zh-cn","highlight":true,"mathJax":false}, {
+    valine.init(Object.assign({"path":null,"placeholder":"快来评论吧~","appId":"Ufjxyhl1UdwhJx0RYQSk5vlT-MdYXbMMI","appKey":"buKTrgdG6xJPU7vMs4raKGNq","meta":["nick","mail","link"],"requiredFields":["nick","mail"],"enableQQ":true,"recordIP":false,"avatar":"identicon","pageSize":10,"lang":"zh-cn","highlight":true,"mathJax":false}, {
       el: '#valine_container',
       path: path,
       placeholder: pagePlaceholder,
@@ -1009,6 +1012,8 @@ var loadCSS = function( href, before, media, attributes ){
 
 
 
+
+  <script defer src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-busuanzi@2.3/js/busuanzi.pure.mini.js" data-pjax></script>
 
 
 
@@ -1031,8 +1036,8 @@ var loadCSS = function( href, before, media, attributes ){
   <script defer>
 
   const LCCounter = {
-    app_id: 'u9j57bwJod4EDmXWdxrwuqQT-MdYXbMMI',
-    app_key: 'jfHtEKVE24j0IVCGHbvuFClp',
+    app_id: 'Ufjxyhl1UdwhJx0RYQSk5vlT-MdYXbMMI',
+    app_key: 'buKTrgdG6xJPU7vMs4raKGNq',
     custom_api_server: '',
 
     // 查询存储的记录
