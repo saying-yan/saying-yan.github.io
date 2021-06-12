@@ -41,9 +41,9 @@
       
         <tags>
             
-            <tag> 嗅探 </tag>
-            
             <tag> python </tag>
+            
+            <tag> 嗅探 </tag>
             
             <tag> C </tag>
             
@@ -162,11 +162,11 @@
       
         <tags>
             
+            <tag> python </tag>
+            
             <tag> CTF-web </tag>
             
             <tag> SSTI </tag>
-            
-            <tag> python </tag>
             
         </tags>
       
