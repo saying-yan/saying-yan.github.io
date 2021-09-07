@@ -5,8 +5,6 @@
   <!-- SEO相关 -->
   
     
-      <meta name="robots" content="noindex,follow">
-    
   
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
@@ -24,7 +22,9 @@
 
   <!-- 页面元数据 -->
   
-  <title>Tag: python - Sayingの魔法书</title>
+  <title>wireguard基础配置 - Sayingの魔法书</title>
+  
+    <meta name="keywords" content="VPN">
   
 
   
@@ -353,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper  featured' style="display: none;">
+        <div id="full" class='cover-wrapper post featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -409,195 +409,238 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+  <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
   
+
+
+  
+  <div class="article-meta" id="top">
     
-      
-  <section class="post-list">
     
-      
+    
+      <h1 class="title">
+        wireguard基础配置
+      </h1>
+      <div class='new-meta-box'>
         
+          
+            
+<div class='new-meta-item author'>
+  <a class='author' href="/" rel="nofollow">
+    <img no-lazy src="">
+    <p>请设置文章作者</p>
+  </a>
+</div>
+
           
         
           
-        
+            
+
           
         
-      
-    
-    
-      
+          
+            <div class="new-meta-item date">
+  <a class='notlink'>
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：Sep 6, 2021</p>
+  </a>
+</div>
+
+          
         
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow">
+          
+            
+  <div class="new-meta-item browse leancloud">
+    <a class='notlink'>
+      
+      <div id="lc-pv" data-title="wireguard基础配置" data-path="/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/">
+        <i class="fas fa-eye fa-fw" aria-hidden="true"></i>
+        <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+        次浏览
+      </div>
+    </a>
+  </div>
+
+
+          
+        
+      </div>
+    
+  </div>
+
+
   
   
+  <p> 本文配置的wireguard只是为了**（</p>
+<h3 id="1-安装"><a href="#1-安装" class="headerlink" title="1.安装"></a>1.安装</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">add-apt-repository ppa:wireguard/wireguard</span><br><span class="line">apt update</span><br><span class="line">apt install wireguard</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-创建配置文件-服务器"><a href="#2-创建配置文件-服务器" class="headerlink" title="2.创建配置文件(服务器)"></a>2.创建配置文件(服务器)</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mkdir ~/.wireguard</span><br><span class="line">cd ~/.wireguard/</span><br><span class="line">wg genkey | tee pri1 | wg pubkey &gt;pub1	#生成服务器私钥、公钥</span><br><span class="line">wg genkey | tee pri2 | wg pubkey &gt;pub2	#生成客户端私钥、公钥</span><br><span class="line">chmod 600 pri1</span><br><span class="line">chmod 600 pri2</span><br></pre></td></tr></table></figure>
+
+<p>创建wg0.conf文件：</p>
+<details green><summary> 服务器配置文件`/etc/wireguard/wg0.conf` </summary>
+              <div class='content'>
+              <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[Interface]</span><br><span class="line">PrivateKey = 服务器私钥</span><br><span class="line">Address = 10.0.0.1/24</span><br><span class="line">ListenPort = 54321</span><br><span class="line">PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -A FORWARD -o wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o ens17 -j MASQUERADE</span><br><span class="line">PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -D FORWARD -o wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o ens17 -j MASQUERADE</span><br><span class="line">DNS = 8.8.8.8</span><br><span class="line">MTU = 1420</span><br><span class="line"></span><br><span class="line">[Peer]</span><br><span class="line">PublicKey = 客户端公钥</span><br><span class="line">AllowedIPs = 10.0.0.2/24</span><br></pre></td></tr></table></figure>
+              </div>
+            </details>
+
+<p><strong>还需要开启转发</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">echo 1 &gt; /proc/sys/net/ipv4/ip_forward</span><br><span class="line">echo &quot;net.ipv4.ip_forward = 1&quot; &gt;&gt; /etc/sysctl.confsysctl -p</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-启动"><a href="#3-启动" class="headerlink" title="3.启动"></a>3.启动</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wg-quick up wg0</span><br></pre></td></tr></table></figure>
+
+<p>事实上中间运行时出了点问题，需要安装<code>resolvconf</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install openresolv</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-客户端配置"><a href="#4-客户端配置" class="headerlink" title="4.客户端配置"></a>4.客户端配置</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[Interface]</span><br><span class="line">PrivateKey = 客户端私钥</span><br><span class="line">Address = 10.0.0.2/24</span><br><span class="line">DNS = 8.8.8.8</span><br><span class="line">MTU = 1420</span><br><span class="line"></span><br><span class="line">[Peer]</span><br><span class="line">PublicKey = 服务器公钥</span><br><span class="line">AllowedIPs = 0.0.0.0/0</span><br><span class="line">Endpoint = 204.44.92.171:54321</span><br><span class="line">PersistentKeepalive = 25</span><br></pre></td></tr></table></figure>
+
+
   
-    <div class='headimg-div'>
-      <a class='headimg-a' href="/2021/06/06/%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%AE%9E%E8%B7%B5-%E4%BA%8C-%E7%AC%AC7%E3%80%818%E6%AC%A1%E5%AE%9E%E9%AA%8C/">
-        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606131718.png'/>
-      </a>
+  
+    
+    <div class='footer'>
+      
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/>http://example.com/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
     </div>
   
   
     
-    <h2 class="article-title" >
-      <a href="/2021/06/06/%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%AE%9E%E8%B7%B5-%E4%BA%8C-%E7%AC%AC7%E3%80%818%E6%AC%A1%E5%AE%9E%E9%AA%8C/">
-        网络攻防实践(二)第7、8次实验
-      </a>
-    </h2>
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateUpdated" datetime="2021-09-07T10:36:28+08:00">
+  <a class='notlink'>
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：Sep 7, 2021</p>
+  </a>
+</div>
+
+        
+      
+        
+          
   
-  <div class='md'>
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/VPN/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>VPN</p></a></div>
+
+
+        
+      
+        
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
     
       
-        网络攻防实践(二)第7、8次实验攻防实践毁我青春
-
-经历了前几次极其无聊的攻防实践尤其是垃圾渗透测试，终于到了这次算是我较为感兴趣的攻防实践——嗅探与伪造/ARP缓存中毒。碰巧这几天重构了自己的博客，顺手写进博客
-一、嗅探与伪造1.1 scapy路由追踪目的是scapy实现路由追踪。实际上，有关路由追踪的常见方式有两种：
-
-linux/BSD/router/UNIX下的traceroute。...
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/&title=wireguard基础配置 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/&title=wireguard基础配置 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2021/09/06/wireguard%E9%85%8D%E7%BD%AE/&title=wireguard基础配置 - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+    
       
     
   </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time>2021-06-06</time>
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2021/06/06/%E7%BD%91%E7%BB%9C%E6%94%BB%E9%98%B2%E5%AE%9E%E8%B7%B5-%E4%BA%8C-%E7%AC%AC7%E3%80%818%E6%AC%A1%E5%AE%9E%E9%AA%8C/'>
-            Read More
-          </a>
-        </div>
-      
-    </div>
-  
-
 </div>
 
-          </div>
+
+
         
       
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow">
-  
-  
-  
-    <div class='headimg-div'>
-      <a class='headimg-a' href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143000.png'/>
-      </a>
     </div>
-  
-  
-    
-    <h2 class="article-title" >
-      <a href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        重复执行程序脚本
-      </a>
-    </h2>
-  
-  <div class='md'>
-    
-      
-        在项目组工作的过程中，遇到了一个任务：需要重复执行某程序，生成大量的流量。抓取流量，用于AI的学习。因此需要写脚本不断执行程序。我选择了python语言。
-一、（1）dewdropdewdrop是一款linux后门软件。在靶机上运行dewdrop服务器后，就可以在攻击机上运行dewdrop客户端连接上靶机，实现远程控制。
-我选择subprocess模块。subprocess模块允许启动一个新...
-      
-    
   </div>
+
+
   
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time>2020-09-08</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/Dian/">Dian</a>
-        
-      </div>
+  
+
+  
+    <div class="prev-next">
       
-        <div>
-          <a class='readmore' href='/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/'>
-            Read More
-          </a>
-        </div>
+      
+        <a class='next' href='/2021/06/12/flask-jinja2/'>
+          <p class='title'>flask_jinja2<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'> 挺久之前氵的笔记
+0. jinja2 vs Django template
+性能上
+jinja2能够比Django的模版引擎快10到20倍
+
+语法上
+概括来说，可以总结为：Jinja的语法更接...</p>
+        </a>
       
     </div>
   
+</article>
 
+
+  
+
+  <article class="post white-box reveal shadow" id="comments">
+    <p ct><i class='fas fa-comments'></i> 评论</p>
+    
+    <div id="valine_container" class="valine_thread">
+  <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
 </div>
 
-          </div>
-        
-      
-        
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow">
-  
-  
-  
-    <div class='headimg-div'>
-      <a class='headimg-a' href="/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/">
-        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606142813.png'/>
-      </a>
-    </div>
-  
-  
-    
-    <h2 class="article-title" >
-      <a href="/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/">
-        flask模板注入
-      </a>
-    </h2>
-  
-  <div class='md'>
-    
-      
-        Flask模板注入（一）Flask中使用了Jinja2作为模板渲染引擎，Jinja2会将{{}}中包裹的内容当作变量解析替换。当服务器接受了用户的输入并将其作为模板的一部分，在渲染的过程中就可能渲染了用户插入的恶意内容，导致敏感信息泄露甚至代码执行。
-1、实现模板注入1.1 基础知识（1）_class_ 获取当前实例的类对象1234&gt;&gt;&gt; &#x27;&#x27;.__cl...
-      
-    
-  </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
-        
-        <time>2020-08-16</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
-        
-      </div>
-      
-        <div>
-          <a class='readmore' href='/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/'>
-            Read More
-          </a>
-        </div>
-      
-    </div>
-  
-
-</div>
-
-          </div>
-        
-      
-    
-  </section>
-  
-    
-  
+  </article>
 
 
-    
-  
+
+
+
+
 </div>
 <aside class='l_side'>
   
@@ -605,146 +648,28 @@ linux/BSD/router/UNIX下的traceroute。...
     
     
 
-<section class="widget blogger shadow desktop mobile">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img no-lazy src='https://gitee.com/saying_yy/blog-image/raw/master/img/2.jpg'/>
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Saying</h2>
-        
-        
-          <p>一只蒻苟</p>
 
-        
-        
-          <p><span id="jinrishici-sentence">Sayingの魔法书</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/1396318209@qq.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/saying-yan"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop">
+  <section class="widget toc-wrapper shadow desktop mobile" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/CTF-web/" href="/categories/CTF-web/"
-            id="categoriesCTF-web"
-            ><div class='name'>CTF-web</div><div class='badge'>(2)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/Dian/" href="/categories/Dian/"
-            id="categoriesDian"
-            ><div class='name'>Dian</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/flask/" href="/categories/flask/"
-            id="categoriesflask"
-            ><div class='name'>flask</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/misc/" href="/categories/misc/"
-            id="categoriesmisc"
-            ><div class='name'>misc</div><div class='badge'>(1)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85"><span class="toc-text">1.安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%88%9B%E5%BB%BA%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="toc-text">2.创建配置文件(服务器)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%90%AF%E5%8A%A8"><span class="toc-text">3.启动</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-text">4.客户端配置</span></a></li></ol>
     </div>
   </section>
 
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/C/" style="font-size: 14px; color: #999">C</a> <a href="/tags/CTF/" style="font-size: 14px; color: #999">CTF</a> <a href="/tags/CTF-web/" style="font-size: 19px; color: #777">CTF-web</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 14px; color: #999">SQL注入</a> <a href="/tags/SSTI/" style="font-size: 14px; color: #999">SSTI</a> <a href="/tags/VPN/" style="font-size: 14px; color: #999">VPN</a> <a href="/tags/flask/" style="font-size: 14px; color: #999">flask</a> <a href="/tags/jinja2/" style="font-size: 14px; color: #999">jinja2</a> <a href="/tags/linux/" style="font-size: 14px; color: #999">linux</a> <a href="/tags/php/" style="font-size: 14px; color: #999">php</a> <a href="/tags/python/" style="font-size: 24px; color: #555">python</a> <a href="/tags/unicode/" style="font-size: 14px; color: #999">unicode</a> <a href="/tags/%E5%97%85%E6%8E%A2/" style="font-size: 14px; color: #999">嗅探</a> <a href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" style="font-size: 14px; color: #999">重定向</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 </aside>
+
 
 
 		  
@@ -753,8 +678,8 @@ linux/BSD/router/UNIX下的traceroute。...
 
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="wireguard基础配置";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   // header 这里无论是否开启pjax都需要
