@@ -4,6 +4,25 @@
   
     
     <entry>
+      <title>分布式唯一ID</title>
+      <link href="2021/10/28/%E5%88%86%E5%B8%83%E5%BC%8F%E5%94%AF%E4%B8%80ID/"/>
+      <url>2021/10/28/%E5%88%86%E5%B8%83%E5%BC%8F%E5%94%AF%E4%B8%80ID/</url>
+      
+        <content type="html"><![CDATA[<h1 id="分布式唯一ID"><a href="#分布式唯一ID" class="headerlink" title="分布式唯一ID"></a>分布式唯一ID</h1><h2 id="一、分布式唯一ID"><a href="#一、分布式唯一ID" class="headerlink" title="一、分布式唯一ID"></a>一、分布式唯一ID</h2><p>ID是一种唯一的标识。在开发中，经常需要使用ID来唯一标识数据。例如，原神中给每个用户分配一个UID。</p><p>在最简单的情况下，可以使用数据库的主键自增，自动实现唯一ID。如<code>Mysql</code>的<code>AUTO_INCREMENT</code>。但这种方式具有一定的缺点：一方面，由于依赖于数据库自动实现ID自增，这意味着只有在完成数据的插入之后，才能获得改数据的ID。对于一些需要双向引用的数据，将不得不在插入两份数据后，再做一次更新操作，才能实现双向引用。另一方面，也是最重要的一方面，在分布式系统中，可能需要对数据库进行分库分表。一旦分库分表，通过数据库主键自增的方法将无法再保证ID的唯一性。</p><p>因此，在分布式的场景中，往往会设计一种ID生成器，去实现分布式ID的生成。</p><p>分布式ID需要<strong>尽可能</strong>满足以下要求：</p><ul><li>唯一性：保证ID在分布式系统中全局唯一。</li><li>有序性：保证ID有序（一般是递增），有序的ID在很多场景下有利于性能的提升。</li><li>安全性：ID本身不能暴露出敏感信息。</li></ul><h2 id="二、常用方案"><a href="#二、常用方案" class="headerlink" title="二、常用方案"></a>二、常用方案</h2><h3 id="2-1-数据库号段模式"><a href="#2-1-数据库号段模式" class="headerlink" title="2.1 数据库号段模式"></a>2.1 数据库号段模式</h3><p>事实上，仍然可以通过数据库的主键自增，实现唯一ID的生成。只要分布式系统中所有的机器都只使用同一个数据库主键自增生成ID，而不是在自己的数据库服务中生成ID，就不会出现上述的情况。</p><p>但实际上，这样操作是不现实的。作为ID生成器的一台数据库服务器往往无法负担起整个分布式系统的请求。</p><p><strong>数据库号段模式</strong>正是一种改进措施。每次访问用于生成ID的数据库服务器时，直接批量获取多个ID，称为获取一个号段，如获取ID：(1, 1000]。将ID缓存在本地，业务需要ID时直接从缓存中获取。直至缓存中的ID用尽，再重新去请求生成ID的数据库服务器。</p><h3 id="2-2-UUID"><a href="#2-2-UUID" class="headerlink" title="2.2 UUID"></a>2.2 UUID</h3><p>UUID是<code>Universally Unique Identifier</code>，即<code>通用唯一标识</code>。</p><p>UUID是36个字符的字符串，格式为：<code>xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>。UUID生成算法当前有5个版本：</p><ul><li>version 1, date-time &amp; MAC address</li><li>version 2, date-time &amp; group/user id</li><li>version 3, MD5 hash &amp; namespace</li><li>version 4, pseudo-random number</li><li>version 5, SHA-1 hash &amp; namespace</li></ul><p>对于version1和version4，由于时间戳和随机数的唯一性，可以保证生成的UUID是唯一的。</p><p>优点：</p><ul><li>易于使用</li><li>生成UUID的速度较快</li></ul><p>缺点：</p><ul><li>字符串太长，占用空间。</li><li>作为无序的字符串，不适合用作数据库的主键或索引（速度太慢）</li><li>基于MAC地址的UUID生成算法可能导致泄露MAC地址</li></ul><h3 id="2-3-Snowflake"><a href="#2-3-Snowflake" class="headerlink" title="2.3 Snowflake"></a>2.3 Snowflake</h3><p>Snowflake 是 Twitter 开源的分布式 ID 生成算法。Snowflake由64bit组成。</p><p><img src="https://gitee.com/saying_yy/blog-image/raw/master/img/20211028161716.png" class="lazyload" data-srcset="https://gitee.com/saying_yy/blog-image/raw/master/img/20211028161716.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII="></p><ul><li>第0位表示符号，一定为正，故第0位一定为0。</li><li>第1—41位表示时间戳。以毫秒为单位，<code>2^41</code>毫秒约可以表示69年的范围。但是指的注意的是，这里的时间戳并非传统意义的unix时间戳，不必从1970年1月1日开始计时，而是一种相对的时间戳，可以任意选取计时的起点。</li><li>第42—52位表示<code>workerID</code>。即工作机器的ID。可以保证在不同的机器上生成的ID互不相同。</li><li>第53—64位表示序列号。序列号是自增的，用来保证某个机器每毫秒生成的ID互不相同。故，1ms的时间中，一个worker最大能够生成<code>2^12</code>个ID。</li></ul><p>优点：</p><ul><li>生成速度较快，生成的ID有序。</li></ul><p>缺点：</p><ul><li>如果发生时钟回拨，可能会产生重复ID。</li></ul><h3 id="2-4-Leaf"><a href="#2-4-Leaf" class="headerlink" title="2.4 Leaf"></a>2.4 Leaf</h3><p><code>Leaf</code>是美团的分布式ID生成框架。支持号段模式，也支持snowflake模式。</p><p>具体细节可以参考<a href="https://tech.meituan.com/2017/04/21/mt-leaf.html">美团官方技术团队的文章</a>。</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 分布式 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>wireguard基础配置</title>
       <link href="2021/09/06/wireguard%E9%85%8D%E7%BD%AE/"/>
       <url>2021/09/06/wireguard%E9%85%8D%E7%BD%AE/</url>
