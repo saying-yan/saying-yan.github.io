@@ -5,8 +5,6 @@
   <!-- SEO相关 -->
   
     
-      <meta name="robots" content="noindex,follow">
-    
   
   <!-- 渲染优化 -->
   <meta http-equiv='x-dns-prefetch-control' content='on' />
@@ -24,7 +22,9 @@
 
   <!-- 页面元数据 -->
   
-  <title>Tag: 重定向 - Sayingの魔法书</title>
+  <title>Etcd API - Sayingの魔法书</title>
+  
+    <meta name="keywords" content="Etcd">
   
 
   
@@ -353,7 +353,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
       <div id="l_cover">
   
     
-        <div id="full" class='cover-wrapper  featured' style="display: none;">
+        <div id="full" class='cover-wrapper post featured' style="display: none;">
           
             <div id='cover-backstretch'></div>
           
@@ -409,84 +409,225 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
+  <article class="article post white-box reveal md shadow article-type-post" id="post" itemscope itemprop="blogPost">
+  
+
+
+  
+  <div class="article-meta" id="top">
+    
+    
+    
+      <h1 class="title">
+        Etcd API
+      </h1>
+      <div class='new-meta-box'>
+        
+          
+            
+<div class='new-meta-item author'>
+  <a class='author' href="/" rel="nofollow">
+    <img no-lazy src="">
+    <p>请设置文章作者</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+
+          
+        
+          
+            <div class="new-meta-item date">
+  <a class='notlink'>
+    <i class="fas fa-calendar-alt fa-fw" aria-hidden="true"></i>
+    <p>发布于：Jan 15, 2022</p>
+  </a>
+</div>
+
+          
+        
+          
+            
+  <div class="new-meta-item browse leancloud">
+    <a class='notlink'>
+      
+      <div id="lc-pv" data-title="Etcd API" data-path="/2022/01/15/Etcd/">
+        <i class="fas fa-eye fa-fw" aria-hidden="true"></i>
+        <span id='number'><i class="fas fa-circle-notch fa-spin fa-fw" aria-hidden="true"></i></span>
+        次浏览
+      </div>
+    </a>
+  </div>
+
+
+          
+        
+      </div>
+    
+  </div>
+
+
+  
+  
+  <h3 id="核心API"><a href="#核心API" class="headerlink" title="核心API"></a>核心API</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">service KV &#123;</span><br><span class="line">  // 从键值存储中获取范围内的key.</span><br><span class="line">  rpc Range(RangeRequest) returns (RangeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 放置给定key到键值存储.</span><br><span class="line">  // put请求增加键值存储的修订版本并在事件历史中生成一个事件.</span><br><span class="line">  rpc Put(PutRequest) returns (PutResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 从键值存储中删除给定范围。</span><br><span class="line">  // 删除请求增加键值存储的修订版本并在事件历史中为每个被删除的key生成一个删除事件.</span><br><span class="line">  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 在单个事务中处理多个请求。</span><br><span class="line">  // 一个 txn 请求增加键值存储的修订版本并为每个完成的请求生成带有相同修订版本的事件。</span><br><span class="line">  // 不容许在一个txn中多次修改同一个key.</span><br><span class="line">  rpc Txn(TxnRequest) returns (TxnResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 压缩在etcd键值存储中的事件历史。</span><br><span class="line">  // 键值存储应该定期压缩，否则事件历史会无限制的持续增长.</span><br><span class="line">  rpc Compact(CompactionRequest) returns (CompactionResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">service Watch &#123;</span><br><span class="line">   // Watch 观察将要发生或者已经发生的事件。</span><br><span class="line">   // 输入和输出都是流;输入流用于创建和取消观察，而输出流发送事件。</span><br><span class="line">   // 一个观察 RPC 可以在一次性在多个key范围上观察，并为多个观察流化事件。</span><br><span class="line">   // 整个事件历史可以从最后压缩修订版本开始观察。</span><br><span class="line">  rpc Watch(stream WatchRequest) returns (stream WatchResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">service Lease &#123;</span><br><span class="line">  // LeaseGrant 创建一个租约，当服务器在给定 time to live 时间内没有接收到 keepAlive 时租约过期。</span><br><span class="line">  // 如果租约过期则所有附加在租约上的key将过期并被删除。</span><br><span class="line">  // 每个过期的key在事件历史中生成一个删除事件。</span><br><span class="line">  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseRevoke 撤销一个租约。</span><br><span class="line">  // 所有附加到租约的key将过期并被删除。</span><br><span class="line">  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseKeepAlive 通过从客户端到服务器端的流化的 keep alive 请求和从服务器端到客户端的流化的 keep alive 应答来维持租约.</span><br><span class="line">  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseTimeToLive 获取租约信息。</span><br><span class="line">  rpc LeaseTimeToLive(LeaseTimeToLiveRequest) returns (LeaseTimeToLiveResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+  
   
     
+    <div class='footer'>
       
-  <section class="post-list">
+      
+      
+        <div class='copyright'>
+          <blockquote>
+            
+              
+                <p>博客内容遵循 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0) 协议</p>
+
+              
+            
+              
+                <p>本文永久链接是：<a href=http://example.com/2022/01/15/Etcd/>http://example.com/2022/01/15/Etcd/</a></p>
+              
+            
+          </blockquote>
+        </div>
+      
+      
+    </div>
+  
+  
     
+
+
+  <div class='article-meta' id="bottom">
+    <div class='new-meta-box'>
+      
+        
+          <div class="new-meta-item date" itemprop="dateUpdated" datetime="2022-02-20T19:21:36+08:00">
+  <a class='notlink'>
+    <i class="fas fa-edit fa-fw" aria-hidden="true"></i>
+    <p>更新于：Feb 20, 2022</p>
+  </a>
+</div>
+
+        
       
         
           
+  
+  <div class="new-meta-item meta-tags"><a class="tag" href="/tags/Etcd/" rel="nofollow"><i class="fas fa-hashtag fa-fw" aria-hidden="true"></i><p>Etcd</p></a></div>
+
+
         
       
-    
-    
-      
         
-          <div class='post-wrapper'>
-            <div class="post post-v3 white-box reveal shadow">
-  
-  
-  
-    <div class='headimg-div'>
-      <a class='headimg-a' href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143000.png'/>
-      </a>
-    </div>
-  
-  
-    
-    <h2 class="article-title" >
-      <a href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        重复执行程序脚本
-      </a>
-    </h2>
-  
-  <div class='md'>
+          
+  <div class="new-meta-item share -mob-share-list">
+  <div class="-mob-share-list share-body">
     
       
-        在项目组工作的过程中，遇到了一个任务：需要重复执行某程序，生成大量的流量。抓取流量，用于AI的学习。因此需要写脚本不断执行程序。我选择了python语言。
-一、（1）dewdropdewdrop是一款linux后门软件。在靶机上运行dewdrop服务器后，就可以在攻击机上运行dewdrop客户端连接上靶机，实现远程控制。
-我选择subprocess模块。subprocess模块允许启动一个新...
+        <a class="-mob-share-qq" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://example.com/2022/01/15/Etcd/&title=Etcd API - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qq.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-qzone" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=http://example.com/2022/01/15/Etcd/&title=Etcd API - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/qzone.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+        <a class="-mob-share-weibo" title="" rel="external nofollow noopener noreferrer noopener"
+          
+          target="_blank" href="http://service.weibo.com/share/share.php?url=http://example.com/2022/01/15/Etcd/&title=Etcd API - Sayingの魔法书&summary="
+          
+          >
+          
+            <img src="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" class="lazyload" data-srcset="https://cdn.jsdelivr.net/gh/volantis-x/cdn-org/logo/128/weibo.png" srcset="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=">
+          
+        </a>
+      
+    
+      
+    
       
     
   </div>
-  
-    <div class='meta-v3' line_style='solid'>
-      <div>
+</div>
+
+
+
         
-        <time>2020-09-08</time>
-        
-          <span class="dot"></span>
-          <a class="category-link" href="/categories/Dian/">Dian</a>
-        
-      </div>
       
-        <div>
-          <a class='readmore' href='/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/'>
-            Read More
-          </a>
-        </div>
+    </div>
+  </div>
+
+
+  
+  
+
+  
+    <div class="prev-next">
+      
+        <a class='prev' href='/2022/02/10/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0/'>
+          <p class='title'><i class="fas fa-chevron-left" aria-hidden="true"></i>分布式锁的实现</p>
+          <p class='content'>分布式锁的实现分布式锁应具备以下特点：
+
+互斥：在任意时刻，锁最多只能被同一个客户端（进程所持有）
+防死锁：避免死锁情况，当一个客户端在持有锁期间内，由于意外崩溃而导致锁未能主动解锁，其持有的锁...</p>
+        </a>
+      
+      
+        <a class='next' href='/2021/10/28/%E5%88%86%E5%B8%83%E5%BC%8F%E5%94%AF%E4%B8%80ID/'>
+          <p class='title'>分布式唯一ID<i class="fas fa-chevron-right" aria-hidden="true"></i></p>
+          <p class='content'>分布式唯一ID一、分布式唯一IDID是一种唯一的标识。在开发中，经常需要使用ID来唯一标识数据。例如，原神中给每个用户分配一个UID。
+在最简单的情况下，可以使用数据库的主键自增，自动实现唯一I...</p>
+        </a>
       
     </div>
   
+</article>
 
+
+  
+
+  <article class="post white-box reveal shadow" id="comments">
+    <p ct><i class='fas fa-comments'></i> 评论</p>
+    
+    <div id="valine_container" class="valine_thread">
+  <i class="fas fa-cog fa-spin fa-fw fa-2x"></i>
 </div>
 
-          </div>
-        
-      
-    
-  </section>
-  
-    
-  
+  </article>
 
 
-    
-  
+
+
+
+
 </div>
 <aside class='l_side'>
   
@@ -494,146 +635,28 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     
     
 
-<section class="widget blogger shadow desktop mobile">
-  <div class='content'>
-    
-      
-        <a class='avatar flat-box rectangle' href='/about/'>
-          <img no-lazy src='https://gitee.com/saying_yy/blog-image/raw/master/img/2.jpg'/>
-        </a>
-      
-    
-    
-      <div class='text'>
-        
-          <h2>Saying</h2>
-        
-        
-          <p>一只蒻苟</p>
 
-        
-        
-          <p><span id="jinrishici-sentence">Sayingの魔法书</span></p>
-          <script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
-        
-      </div>
-    
-    
-      <div class="social-wrapper">
-        
-          
-            <a href="/atom.xml"
-              class="social fas fa-rss flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/1396318209@qq.com"
-              class="social fas fa-envelope flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="https://github.com/saying-yan"
-              class="social fab fa-github flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-          
-            <a href="/"
-              class="social fas fa-headphones-alt flat-btn"
-              target="_blank"
-              rel="external nofollow noopener noreferrer">
-              
-            </a>
-          
-        
-      </div>
-    
-  </div>
-</section>
 
-  
-
-  
-    
-    
-  
-
-  <section class="widget category shadow desktop">
+  <section class="widget toc-wrapper shadow desktop mobile" id="toc-div" >
     
   <header>
     
-      <a href='/blog/categories/'><i class="fas fa-folder-open fa-fw" aria-hidden="true"></i><span class='name'>文章分类</span></a>
+      <i class="fas fa-list fa-fw" aria-hidden="true"></i><span class='name'>本文目录</span>
     
   </header>
 
 
     <div class='content'>
-      <ul class="entry navigation">
-        
-          <li><a class="flat-box"
-            title="/categories/CTF-web/" href="/categories/CTF-web/"
-            id="categoriesCTF-web"
-            ><div class='name'>CTF-web</div><div class='badge'>(2)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/Dian/" href="/categories/Dian/"
-            id="categoriesDian"
-            ><div class='name'>Dian</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/flask/" href="/categories/flask/"
-            id="categoriesflask"
-            ><div class='name'>flask</div><div class='badge'>(1)</div></a></li>
-        
-          <li><a class="flat-box"
-            title="/categories/misc/" href="/categories/misc/"
-            id="categoriesmisc"
-            ><div class='name'>misc</div><div class='badge'>(1)</div></a></li>
-        
-      </ul>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83API"><span class="toc-text">核心API</span></a></li></ol>
     </div>
   </section>
 
-
-  
-
-  
-    
-    
-  
-
-  <section class="widget tagcloud shadow desktop mobile">
-    
-  <header>
-    
-      <a href='/blog/tags/'><i class="fas fa-tags fa-fw" aria-hidden="true"></i><span class='name'>热门标签</span></a>
-    
-  </header>
-
-
-    <div class='content'>
-      <a href="/tags/C/" style="font-size: 14px; color: #999">C</a> <a href="/tags/CTF/" style="font-size: 14px; color: #999">CTF</a> <a href="/tags/CTF-web/" style="font-size: 19px; color: #777">CTF-web</a> <a href="/tags/Etcd/" style="font-size: 14px; color: #999">Etcd</a> <a href="/tags/SQL%E6%B3%A8%E5%85%A5/" style="font-size: 14px; color: #999">SQL注入</a> <a href="/tags/SSTI/" style="font-size: 14px; color: #999">SSTI</a> <a href="/tags/VPN/" style="font-size: 14px; color: #999">VPN</a> <a href="/tags/flask/" style="font-size: 14px; color: #999">flask</a> <a href="/tags/jinja2/" style="font-size: 14px; color: #999">jinja2</a> <a href="/tags/linux/" style="font-size: 14px; color: #999">linux</a> <a href="/tags/php/" style="font-size: 14px; color: #999">php</a> <a href="/tags/python/" style="font-size: 24px; color: #555">python</a> <a href="/tags/unicode/" style="font-size: 14px; color: #999">unicode</a> <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" style="font-size: 19px; color: #777">分布式</a> <a href="/tags/%E5%97%85%E6%8E%A2/" style="font-size: 14px; color: #999">嗅探</a> <a href="/tags/%E9%87%8D%E5%AE%9A%E5%90%91/" style="font-size: 14px; color: #999">重定向</a>
-    </div>
-  </section>
-
-
-  
 
   
 
 
 </aside>
+
 
 
 		  
@@ -642,8 +665,8 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 <script>
   window.pdata={}
-  pdata.ispage=false;
-  pdata.postTitle="";
+  pdata.ispage=true;
+  pdata.postTitle="Etcd API";
   pdata.commentPath="";
   pdata.commentPlaceholder="";
   // header 这里无论是否开启pjax都需要

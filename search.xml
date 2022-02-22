@@ -4,6 +4,44 @@
   
     
     <entry>
+      <title>分布式锁的实现</title>
+      <link href="2022/02/10/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0/"/>
+      <url>2022/02/10/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E7%9A%84%E5%AE%9E%E7%8E%B0/</url>
+      
+        <content type="html"><![CDATA[<h1 id="分布式锁的实现"><a href="#分布式锁的实现" class="headerlink" title="分布式锁的实现"></a>分布式锁的实现</h1><p>分布式锁应具备以下特点：</p><ul><li>互斥：在任意时刻，锁最多只能被同一个客户端（进程所持有）</li><li>防死锁：避免死锁情况，当一个客户端在持有锁期间内，由于意外崩溃而导致锁未能主动解锁，其持有的锁也能够被正确释放，并保证后续其它客户端也能正常加锁</li><li>高可用：分布式锁需要有一定的高可用能力，当提供锁的服务节点故障（宕机）时不影响服务运行，避免单点风险，如Redis的集群模式、哨兵模式，ETCD/zookeeper的集群选主能力等保证HA，保证自身持有的数据与故障节点一致。</li><li>可重入性：对同一个锁，加锁和解锁必须是同一个进程。该进程持有的锁不能被其他进程所释放，也不能释放其他进程所持有的锁。</li></ul><h2 id="1-基于Mysql"><a href="#1-基于Mysql" class="headerlink" title="1. 基于Mysql"></a>1. 基于Mysql</h2><p>{note, info red, 基于Mysql的分布式锁性能较差，实际上使用的不多。}</p><h2 id="2-基于Redis"><a href="#2-基于Redis" class="headerlink" title="2. 基于Redis"></a>2. 基于Redis</h2><h3 id="2-1-setnx-lua"><a href="#2-1-setnx-lua" class="headerlink" title="2.1 setnx+lua"></a>2.1 setnx+lua</h3><ul><li><p><code>lock</code>：SET resource_name unique_value NX PX timeout</p></li><li><p><code>unlock</code>：</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">if redis.call(&quot;get&quot;,KEYS[1]) == ARGV[1] then</span><br><span class="line">    return redis.call(&quot;del&quot;,KEYS[1])</span><br><span class="line">else</span><br><span class="line">    return 0</span><br><span class="line">end</span><br></pre></td></tr></table></figure></li><li><p>lock时，需要通过设置timeout防死锁</p></li><li><p>unlock时，需要先比较value，如果value相同才能删除，是为了防止误解锁，解了其他客户端（进程）加的锁。因此，value需要具有唯一性。</p></li></ul><p>问题：</p><ul><li>Redis的加锁只是在单个节点写入。如果在主从复制的过程中，master节点发生故障，可能无法把锁同步给slave，导致锁丢失。</li></ul><h3 id="2-2-RedLock"><a href="#2-2-RedLock" class="headerlink" title="2.2 RedLock"></a>2.2 RedLock</h3><p>该方案也是基于set命令枷锁和lua脚本实现的。假设有N个Redis节点，例如N=5，这些节点之间是完全独立，我们不适用复制或者任何协调系统，客户端要获取锁的步骤如下：</p><ul><li>获取当前时间，以毫秒为单位。</li><li>依次尝试从5个实例中，使用相同的key和随机值获取锁。当向Redis请求获取锁时，客户端应该设置一个超时时间，这个超时时间应该小于锁的失效时间。例如锁的自动失效时间为10秒时，则超时时间因该在5-50毫秒之间。这样可以防止客户端在试图与一个当即的Redis节点对话长时间处于阻塞状态。如果一个实例不可用，客户端应该尽快尝试去与另外一个Redis实例请求获取锁。</li><li>客户端通过当前时间减去步骤 1 记录的时间来计算获取锁使用的时间。当且仅当从大多数（N/2+1，这里是 3 个节点）的 Redis 节点都取到锁，并且获取锁使用的时间小于锁失效时间时，锁才算获取成功。</li><li>如果取到了锁，其真正有效时间等于初始有效时间减去获取锁所使用的时间（步骤 3 计算的结果）。</li><li>如果由于某些原因未能获得锁（无法在至少 N/2 + 1 个 Redis 实例获取锁、或获取锁的时间超过了有效时间），客户端应该在所有的 Redis 实例上进行解锁（即便某些Redis实例根本就没有加锁成功，防止某些节点获取到锁但是客户端没有得到响应而导致接下来的一段时间不能被重新获取锁）。</li></ul>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 分布式 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Etcd API</title>
+      <link href="2022/01/15/Etcd/"/>
+      <url>2022/01/15/Etcd/</url>
+      
+        <content type="html"><![CDATA[<h3 id="核心API"><a href="#核心API" class="headerlink" title="核心API"></a>核心API</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">service KV &#123;</span><br><span class="line">  // 从键值存储中获取范围内的key.</span><br><span class="line">  rpc Range(RangeRequest) returns (RangeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 放置给定key到键值存储.</span><br><span class="line">  // put请求增加键值存储的修订版本并在事件历史中生成一个事件.</span><br><span class="line">  rpc Put(PutRequest) returns (PutResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 从键值存储中删除给定范围。</span><br><span class="line">  // 删除请求增加键值存储的修订版本并在事件历史中为每个被删除的key生成一个删除事件.</span><br><span class="line">  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 在单个事务中处理多个请求。</span><br><span class="line">  // 一个 txn 请求增加键值存储的修订版本并为每个完成的请求生成带有相同修订版本的事件。</span><br><span class="line">  // 不容许在一个txn中多次修改同一个key.</span><br><span class="line">  rpc Txn(TxnRequest) returns (TxnResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // 压缩在etcd键值存储中的事件历史。</span><br><span class="line">  // 键值存储应该定期压缩，否则事件历史会无限制的持续增长.</span><br><span class="line">  rpc Compact(CompactionRequest) returns (CompactionResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">service Watch &#123;</span><br><span class="line">   // Watch 观察将要发生或者已经发生的事件。</span><br><span class="line">   // 输入和输出都是流;输入流用于创建和取消观察，而输出流发送事件。</span><br><span class="line">   // 一个观察 RPC 可以在一次性在多个key范围上观察，并为多个观察流化事件。</span><br><span class="line">   // 整个事件历史可以从最后压缩修订版本开始观察。</span><br><span class="line">  rpc Watch(stream WatchRequest) returns (stream WatchResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">service Lease &#123;</span><br><span class="line">  // LeaseGrant 创建一个租约，当服务器在给定 time to live 时间内没有接收到 keepAlive 时租约过期。</span><br><span class="line">  // 如果租约过期则所有附加在租约上的key将过期并被删除。</span><br><span class="line">  // 每个过期的key在事件历史中生成一个删除事件。</span><br><span class="line">  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseRevoke 撤销一个租约。</span><br><span class="line">  // 所有附加到租约的key将过期并被删除。</span><br><span class="line">  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseKeepAlive 通过从客户端到服务器端的流化的 keep alive 请求和从服务器端到客户端的流化的 keep alive 应答来维持租约.</span><br><span class="line">  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  // LeaseTimeToLive 获取租约信息。</span><br><span class="line">  rpc LeaseTimeToLive(LeaseTimeToLiveRequest) returns (LeaseTimeToLiveResponse) &#123;&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> Etcd </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>分布式唯一ID</title>
       <link href="2021/10/28/%E5%88%86%E5%B8%83%E5%BC%8F%E5%94%AF%E4%B8%80ID/"/>
       <url>2021/10/28/%E5%88%86%E5%B8%83%E5%BC%8F%E5%94%AF%E4%B8%80ID/</url>

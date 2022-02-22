@@ -5,7 +5,9 @@
   <!-- SEO相关 -->
   
     
-      <meta name="robots" content="noindex,follow">
+      
+        <meta name="robots" content="noindex,follow">
+      
     
   
   <!-- 渲染优化 -->
@@ -24,7 +26,7 @@
 
   <!-- 页面元数据 -->
   
-  <title>Tag: 重定向 - Sayingの魔法书</title>
+  <title>Sayingの魔法书</title>
   
 
   
@@ -409,18 +411,9 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
         <div class="body-wrapper" id="pjax-container">
           
 
-
 <div class='l_main'>
   
-    
-      
   <section class="post-list">
-    
-      
-        
-          
-        
-      
     
     
       
@@ -431,25 +424,24 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   
   
     <div class='headimg-div'>
-      <a class='headimg-a' href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143000.png'/>
+      <a class='headimg-a' href="/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/">
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606142813.png'/>
       </a>
     </div>
   
   
     
     <h2 class="article-title" >
-      <a href="/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/">
-        重复执行程序脚本
+      <a href="/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/">
+        flask模板注入
       </a>
     </h2>
   
   <div class='md'>
     
       
-        在项目组工作的过程中，遇到了一个任务：需要重复执行某程序，生成大量的流量。抓取流量，用于AI的学习。因此需要写脚本不断执行程序。我选择了python语言。
-一、（1）dewdropdewdrop是一款linux后门软件。在靶机上运行dewdrop服务器后，就可以在攻击机上运行dewdrop客户端连接上靶机，实现远程控制。
-我选择subprocess模块。subprocess模块允许启动一个新...
+        Flask模板注入（一）Flask中使用了Jinja2作为模板渲染引擎，Jinja2会将{{}}中包裹的内容当作变量解析替换。当服务器接受了用户的输入并将其作为模板的一部分，在渲染的过程中就可能渲染了用户插入的恶意内容，导致敏感信息泄露甚至代码执行。
+1、实现模板注入1.1 基础知识（1）_class_ 获取当前实例的类对象1234&gt;&gt;&gt; &#x27;&#x27;.__cl...
       
     
   </div>
@@ -457,15 +449,74 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
     <div class='meta-v3' line_style='solid'>
       <div>
         
-        <time>2020-09-08</time>
+        <time>2020-08-16</time>
         
           <span class="dot"></span>
-          <a class="category-link" href="/categories/Dian/">Dian</a>
+          <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
         
       </div>
       
         <div>
-          <a class='readmore' href='/2020/09/08/%E9%87%8D%E5%A4%8D%E6%89%A7%E8%A1%8C%E7%A8%8B%E5%BA%8F%E8%84%9A%E6%9C%AC/'>
+          <a class='readmore' href='/2020/08/16/flask%E6%A8%A1%E6%9D%BF%E6%B3%A8%E5%85%A5%EF%BC%88%E4%B8%80%EF%BC%89/'>
+            Read More
+          </a>
+        </div>
+      
+    </div>
+  
+
+</div>
+
+          </div>
+        
+      
+        
+          <div class='post-wrapper'>
+            <div class="post post-v3 white-box reveal shadow">
+  
+  
+  
+    <div class='headimg-div'>
+      <a class='headimg-a' href="/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/">
+        <img class='headimg' src='https://gitee.com/saying_yy/blog-image/raw/master/img/20210606143141.png'/>
+      </a>
+    </div>
+  
+  
+    
+    <h2 class="article-title" >
+      <a href="/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/">
+        报错注入
+      </a>
+    </h2>
+  
+  <div class='md'>
+    
+      
+        报错注入之前都是做题中积累经验，感觉自己的基础薄弱。大部分时候都是看别人的WP才能做题。最近在看一本《CTF训练营》，补一补基础，做笔记。
+报错注入的条件
+可回显
+回显有报错信息
+过滤不严格（希望WAF不行）
+
+绕过是个麻烦事儿，这里暂且假设没有任何过滤。
+报错注入使用的函数updatexml()1234UPDATEXML (XML_document, XPath_string, new_v...
+      
+    
+  </div>
+  
+    <div class='meta-v3' line_style='solid'>
+      <div>
+        
+        <time>2020-07-10</time>
+        
+          <span class="dot"></span>
+          <a class="category-link" href="/categories/CTF-web/">CTF-web</a>
+        
+      </div>
+      
+        <div>
+          <a class='readmore' href='/2020/07/10/%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/'>
             Read More
           </a>
         </div>
@@ -482,11 +533,24 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
   </section>
   
     
-  
-
-
+      <br>
+      <div class="prev-next">
+        
+          <a class="prev" rel="prev" href="/">
+            <section class="post prev white-box shadow" >
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>&nbsp;Previous&nbsp;
+            </section>
+          </a>
+        
+        <p class="current">
+          2 / 2
+        </p>
+        
+      </div>
     
   
+
+
 </div>
 <aside class='l_side'>
   
@@ -634,6 +698,7 @@ if (/*@cc_on!@*/false || (!!window.MSInputMethodContext && !!document.documentMo
 
 
 </aside>
+
 
 
 		  
